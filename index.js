@@ -23,10 +23,25 @@ client.on('ready', () => {
 });
 
 client.on('message', async (message) => {
+	await treatMessage(message);
+});
+
+client.on('message_create', async (message) => {
+    await treatMessage(message);
+});
+ 
+client.initialize();
+
+async function downloadAndSendYoutubeMp3(videoName) {
+    const path = await yt.download(videoName);
+    return path;
+}
+
+async function treatMessage(message) {
     const chat = await message.getChat();
     const contact = await message.getContact();
 
-	if(message.body.startsWith(prefix)){
+    if(message.body.startsWith(prefix)){
         commands.forEach(async (command) => {
             var commandSplit = message.body.split(" ");
             commandSplit.shift();
@@ -55,11 +70,4 @@ client.on('message', async (message) => {
             }
         })
     }
-});
- 
-client.initialize();
-
-async function downloadAndSendYoutubeMp3(videoName) {
-    const path = await yt.download(videoName);
-    return path;
 }
