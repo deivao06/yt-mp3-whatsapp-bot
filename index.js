@@ -65,7 +65,7 @@ async function treatMessage(message) {
                     }
                 } catch (e) {
                     console.log(e);
-                    await chat.sendMessage(`@${contact.id.user} Não tankei o tamanho não...`, {mentions: [contact]});
+                    await chat.sendMessage(`@${contact.id.user} Não achei nada não mano...`, {mentions: [contact]});
                 }
             }
         })
