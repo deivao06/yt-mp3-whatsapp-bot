@@ -23,10 +23,6 @@ client.on('ready', () => {
     console.log('Client is ready! \n');
 });
 
-// client.on('message', async (message) => {
-// 	await treatMessage(message);
-// });
-
 client.on('message_create', async (message) => {
 	await treatMessage(message);
 });
@@ -74,8 +70,6 @@ async function downloadAndSendYoutubeMp3(message) {
 
 async function mentionEveryone(message) {
     const chat = await message.getChat();
-    
-    console.log(chat);
     const contact = await message.getContact();
 
     console.log(`${contact.id.user} ${chat.name} ${message.body} \n`);
