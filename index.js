@@ -7,7 +7,8 @@ const { YoutubeMusicDownloader } = require('./YoutubeMusicDownloader.js');
 const yt = new YoutubeMusicDownloader();
 const prefix = "!";
 const commands = [
-    {"p": async (videoName) => {return await downloadAndSendYoutubeMp3(videoName)}}
+    {"p": async (message) => {return await downloadAndSendYoutubeMp3(message)}},
+    {"everyone": async (message) => {return await mentionEveryone(message)}}
 ]
 
 const client = new Client({
@@ -19,55 +20,75 @@ client.on('qr', qr => {
 });
 
 client.on('ready', () => {
-    console.log('Client is ready!');
+    console.log('Client is ready! \n');
 });
 
-client.on('message', async (message) => {
-	await treatMessage(message);
-});
+// client.on('message', async (message) => {
+// 	await treatMessage(message);
+// });
 
 client.on('message_create', async (message) => {
-    await treatMessage(message);
+	await treatMessage(message);
 });
  
 client.initialize();
 
-async function downloadAndSendYoutubeMp3(videoName) {
-    const path = await yt.download(videoName);
-    return path;
-}
 
 async function treatMessage(message) {
-    const chat = await message.getChat();
-    const contact = await message.getContact();
-
     if(message.body.startsWith(prefix)){
+        var messageCommand = message.body.split(" ")[0].split(prefix)[1];
         commands.forEach(async (command) => {
-            var commandSplit = message.body.split(" ");
-            commandSplit.shift();
-            commandParameter = commandSplit.join(" ");
-
-            var commandFunction = command[message.body.charAt(1)];
+            var commandFunction = command[messageCommand];
 
             if(commandFunction) {
-                await chat.sendMessage(`@${contact.id.user} Espera aí mano, to procurando ${commandParameter}...`, {mentions: [contact]});
-
-                try {
-                    var response = await commandFunction(commandParameter);
-                    const media = MessageMedia.fromFilePath(response);
-                    message.reply(media);
-
-                    try {
-                        fs.unlinkSync(response)
-                        //file removed
-                    } catch(err) {
-                        console.error(err)
-                    }
-                } catch (e) {
-                    console.log(e);
-                    await chat.sendMessage(`@${contact.id.user} Não achei nada não mano...`, {mentions: [contact]});
-                }
+                commandFunction(message);
             }
         })
     }
+}
+
+async function downloadAndSendYoutubeMp3(message) {
+    const chat = await message.getChat();
+    const contact = await message.getContact();
+
+    console.log(`${contact.id.user} ${chat.name} ${message.body} \n`);
+
+    var commandSplit = message.body.split(" ");
+    commandSplit.shift();
+    var videoName = commandSplit.join(" ");
+
+    await chat.sendMessage(`@${contact.id.user} Espera aí mano, to procurando ${videoName}`, {mentions: [contact]});
+
+    const videoData = await yt.download(videoName);
+
+    const media = MessageMedia.fromFilePath(videoData.path);
+
+    await message.reply(media);
+
+    try {
+        fs.unlinkSync(videoData.path)
+    } catch(err) {
+        console.error(err)
+    }
+}
+
+async function mentionEveryone(message) {
+    const chat = await message.getChat();
+    
+    console.log(chat);
+    const contact = await message.getContact();
+
+    console.log(`${contact.id.user} ${chat.name} ${message.body} \n`);
+
+    var text = "";
+    var mentions = [];
+
+    for(var participant of chat.participants) {
+        const contact = await client.getContactById(participant.id._serialized);
+        
+        mentions.push(contact);
+        text += `@${participant.id.user} `;
+    }
+
+    await chat.sendMessage(text, { mentions });
 }
