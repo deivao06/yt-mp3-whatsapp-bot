@@ -53,18 +53,22 @@ async function downloadAndSendYoutubeMp3(message) {
     commandSplit.shift();
     var videoName = commandSplit.join(" ");
 
-    await chat.sendMessage(`@${contact.id.user} Espera aí mano, to procurando ${videoName}`, {mentions: [contact]});
+    await chat.sendMessage(`@${contact.id.user} Espera aí, to procurando ${videoName}`, {mentions: [contact]});
 
     const videoData = await yt.download(videoName);
 
-    const media = MessageMedia.fromFilePath(videoData.path);
-
-    await message.reply(media);
-
-    try {
-        fs.unlinkSync(videoData.path)
-    } catch(err) {
-        console.error(err)
+    if(!videoData.error) {
+        const media = MessageMedia.fromFilePath(videoData.path);
+    
+        await message.reply(media);
+    
+        try {
+            fs.unlinkSync(videoData.path)
+        } catch(err) {
+            console.error(err)
+        }
+    } else {
+        await chat.sendMessage(`@${contact.id.user} ${videoData.message}`, {mentions: [contact]});
     }
 }
 
