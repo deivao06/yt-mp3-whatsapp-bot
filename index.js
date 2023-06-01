@@ -1,5 +1,6 @@
 const qrcode = require('qrcode-terminal');
 const fs = require('fs')
+const axios = require('axios');
 
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const { YoutubeMusicDownloader } = require('./YoutubeMusicDownloader.js');
@@ -8,7 +9,9 @@ const yt = new YoutubeMusicDownloader();
 const prefix = "!";
 const commands = [
     {"p": async (message) => {return await downloadAndSendYoutubeMp3(message)}},
-    {"everyone": async (message) => {return await mentionEveryone(message)}}
+    {"everyone": async (message) => {return await mentionEveryone(message)}},
+    {"roll": async (message) => {return await rollDice(message)}},
+    {"timetoduel": async (message) => {return await randomYugiohCard(message)}}
 ]
 
 const client = new Client({
@@ -37,7 +40,7 @@ async function handleMessage(message) {
             var commandFunction = command[messageCommand];
 
             if(commandFunction) {
-                commandFunction(message);
+                await commandFunction(message);
             }
         })
     }
@@ -61,7 +64,7 @@ async function downloadAndSendYoutubeMp3(message) {
     } else {
         videoData = await yt.download(videoNameOrUrl);
     }
-    
+
     if(!videoData.error) {
         const media = MessageMedia.fromFilePath(videoData.path);
     
@@ -94,4 +97,57 @@ async function mentionEveryone(message) {
     }
 
     await chat.sendMessage(text, { mentions });
+}
+
+async function rollDice(message) {
+    const chat = await message.getChat();
+    const contact = await message.getContact();
+    const regex = new RegExp('[0-9][d][0-9]');
+
+    console.log(`${contact.id.user} ${chat.name} ${message.body} \n`);
+
+    var commandSplit = message.body.split(" ");
+    commandSplit.shift();
+
+    if(!regex.test(commandSplit.join(" "))) {
+        await message.reply("Escreve direto, exemplo: 2d6 (2 dados de 6 lados)");
+        return;
+    }
+
+    var dices = commandSplit.join(" ").split("d");
+
+    var diceQtd = dices[0];
+    var diceType = dices[1];
+
+    var response = await axios.get(`https://www.dejete.com/api?nbde=${diceQtd}&tpde=${diceType}`);
+
+    var result = "Resultado: (";
+    var sum = 0;
+
+    response.data.forEach((dice, key) => {
+        if(key == response.data.length - 1) {
+            result += `${dice.value})`
+        } else {
+            result += `${dice.value} + `
+        }
+
+        sum += dice.value;
+    })
+
+    result += ` = ${sum}`;
+
+    await message.reply(result);
+}
+
+async function randomYugiohCard(message) {
+    const chat = await message.getChat();
+    const contact = await message.getContact();
+
+    console.log(`${contact.id.user} ${chat.name} ${message.body} \n`);
+
+    var response = await axios.get(`https://db.ygoprodeck.com/api/v7/randomcard.php`);
+
+    const media = await MessageMedia.fromUrl(response.data.card_images[0].image_url);
+    
+    await message.reply(media);
 }
