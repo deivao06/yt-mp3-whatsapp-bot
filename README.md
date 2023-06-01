@@ -30,13 +30,6 @@ Run the bot
 
 Scan the qrcode from your cell phone
 
-Now use the command !p <video name>
-Example:
-```bash
-  !p Rick Astley - Never Gonna Give You Up (Official Music Video)
-```
-
-
 ## Programming language versions
 
 **NodeJS:** v18.13.0
