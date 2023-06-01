@@ -13,7 +13,8 @@ const commands = [
     {"everyone": async (message) => {return await mentionEveryone(message)}},
     {"roll": async (message) => {return await rollDice(message)}},
     {"timetoduel": async (message) => {return await randomYugiohCard(message)}},
-    {"anime": async (message) => {return await animeData(message)}}
+    {"anime": async (message) => {return await animeData(message)}},
+    {"sticker": async (message) => {return await imageToGif(message)}}
 ]
 
 const client = new Client({
@@ -52,7 +53,7 @@ async function downloadAndSendYoutubeMp3(message) {
     const chat = await message.getChat();
     const contact = await message.getContact();
 
-    console.log(`${contact.id.user} ${chat.name} ${message.body}`);
+    console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
 
     var commandSplit = message.body.split(" ");
     commandSplit.shift();
@@ -86,7 +87,7 @@ async function mentionEveryone(message) {
     const chat = await message.getChat();
     const contact = await message.getContact();
 
-    console.log(`${contact.id.user} ${chat.name} ${message.body}`);
+    console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
 
     var text = "";
     var mentions = [];
@@ -106,7 +107,7 @@ async function rollDice(message) {
     const contact = await message.getContact();
     const regex = new RegExp('[0-9][d][0-9]');
 
-    console.log(`${contact.id.user} ${chat.name} ${message.body}`);
+    console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
 
     var commandSplit = message.body.split(" ");
     commandSplit.shift();
@@ -163,13 +164,13 @@ async function animeData(message) {
     const chat = await message.getChat();
     const contact = await message.getContact();
 
-    console.log(`${contact.id.user} ${chat.name} ${message.body}`);
+    console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
 
     var commandSplit = message.body.split(" ");
     commandSplit.shift();
     var animeName = commandSplit.join(" ");
 
-    var response = await axios.get(`https://api.jikan.moe/v4/anime?q=${animeName}&sfw`);
+    var response = await axios.get(`https://api.jikan.moe/v4/anime?q=${animeName}`);
 
     if(response.data.data.length > 0) {
         var anime = response.data.data[0];
@@ -183,9 +184,9 @@ async function animeData(message) {
         synopsis = await translate(anime.synopsis, { from: 'en', to: 'pt' });
 
         var animeSummary = {
-            title: anime.title,
-            title_portuguese: title ?? "",
-            title_english: anime.title_english ?? "",
+            title: `*${anime.title}*`,
+            title_portuguese: title ? `~${title}~` : "",
+            title_english: anime.title_english ? `_${anime.title_english}_` : "",
             episodes: anime.episodes,
             score: anime.score,
             image: anime.images.jpg.image_url,
@@ -195,14 +196,28 @@ async function animeData(message) {
         if(animeSummary.image) {
             const media = await MessageMedia.fromUrl(animeSummary.image);
 
-            await chat.sendMessage(`*${animeSummary.title}*\n_${animeSummary.title_english}_\n~${animeSummary.title_portuguese}~\n\n*Episódios*: ${animeSummary.episodes}\n*Nota*: ${animeSummary.score}\n\n${animeSummary.synopsis}`,
+            await chat.sendMessage(`${animeSummary.title}\n${animeSummary.title_english}\n${animeSummary.title_portuguese}\n\n*Episódios*: ${animeSummary.episodes}\n*Nota*: ${animeSummary.score}\n\n${animeSummary.synopsis}`,
                 {media: media}
             );
         } else {
-            await message.reply(`*${animeSummary.title}*\n_${animeSummary.title_english}_\n~${animeSummary.title_portuguese}~\n\n*Episódios*: ${animeSummary.episodes}\n*Nota*: ${animeSummary.score}\n\n${animeSummary.synopsis}`);
+            await message.reply(`${animeSummary.title}\n${animeSummary.title_english}\n${animeSummary.title_portuguese}\n\n*Episódios*: ${animeSummary.episodes}\n*Nota*: ${animeSummary.score}\n\n${animeSummary.synopsis}`);
         }
     } else {
         await message.reply("Não encontrei nenhum anime com esse nome");
         return;
+    }
+}
+
+async function imageToGif(message) {
+    const chat = await message.getChat();
+    const contact = await message.getContact();
+
+    console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+    
+    if(message.hasMedia) {
+        const media = await message.downloadMedia();
+        await chat.sendMessage(media, {sendMediaAsSticker: true, stickerAuthor: "Robo", stickerName: "imagem", stickerCategories: []});
+    } else {
+        message.reply("Tem que mandar uma imagem junto com a mensagem");
     }
 }
