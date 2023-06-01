@@ -9,11 +9,11 @@ You can change {prefix} in index.js, by now it is "!"
 
 | Command               | Description                                                | Example |
 | ----------------- | ---------------------------------------------------------------- | -------------- |
-| {prefix}p      | Download video from youtube, transform in mp3 and send in whatsapp | (!p Rick Astley - Never Gonna Give You Up (Official Music Video)) |
+| {prefix}p      | Download video from youtube, transform in mp3 and send in whatsapp | !p Rick Astley - Never Gonna Give You Up (Official Music Video) |
 | {prefix}everyone     | Mention everyone | |
-| {prefix}roll      | Roll a dice | (!roll 1d6) |
+| {prefix}roll      | Roll a dice | !roll 1d6 |
 | {prefix}timetoduel  | Random Yugioh card | |
-| {prefix}anime      | Get anime info from MyAnimeList | (!anime Boku no Hero) |
+| {prefix}anime      | Get anime info from MyAnimeList | !anime Boku no Hero |
 | {prefix}sticker      | Get a image and send it back as sticker | |
 
 ## Running on Localhost
