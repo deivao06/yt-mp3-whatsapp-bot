@@ -11,7 +11,8 @@ const commands = [
     {"p": async (message) => {return await downloadAndSendYoutubeMp3(message)}},
     {"everyone": async (message) => {return await mentionEveryone(message)}},
     {"roll": async (message) => {return await rollDice(message)}},
-    {"timetoduel": async (message) => {return await randomYugiohCard(message)}}
+    {"timetoduel": async (message) => {return await randomYugiohCard(message)}},
+    {"anime": async (message) => {return await animeData(message)}}
 ]
 
 const client = new Client({
@@ -50,7 +51,7 @@ async function downloadAndSendYoutubeMp3(message) {
     const chat = await message.getChat();
     const contact = await message.getContact();
 
-    console.log(`${contact.id.user} ${chat.name} ${message.body} \n`);
+    console.log(`${contact.id.user} ${chat.name} ${message.body}`);
 
     var commandSplit = message.body.split(" ");
     commandSplit.shift();
@@ -84,7 +85,7 @@ async function mentionEveryone(message) {
     const chat = await message.getChat();
     const contact = await message.getContact();
 
-    console.log(`${contact.id.user} ${chat.name} ${message.body} \n`);
+    console.log(`${contact.id.user} ${chat.name} ${message.body}`);
 
     var text = "";
     var mentions = [];
@@ -104,7 +105,7 @@ async function rollDice(message) {
     const contact = await message.getContact();
     const regex = new RegExp('[0-9][d][0-9]');
 
-    console.log(`${contact.id.user} ${chat.name} ${message.body} \n`);
+    console.log(`${contact.id.user} ${chat.name} ${message.body}`);
 
     var commandSplit = message.body.split(" ");
     commandSplit.shift();
@@ -118,6 +119,11 @@ async function rollDice(message) {
 
     var diceQtd = dices[0];
     var diceType = dices[1];
+
+    if(diceQtd <= 0 || diceType <= 0) {
+        await message.reply("Escreve direto, não existe dado 0");
+        return;
+    }
 
     var response = await axios.get(`https://www.dejete.com/api?nbde=${diceQtd}&tpde=${diceType}`);
 
@@ -143,11 +149,49 @@ async function randomYugiohCard(message) {
     const chat = await message.getChat();
     const contact = await message.getContact();
 
-    console.log(`${contact.id.user} ${chat.name} ${message.body} \n`);
+    console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
 
     var response = await axios.get(`https://db.ygoprodeck.com/api/v7/randomcard.php`);
 
     const media = await MessageMedia.fromUrl(response.data.card_images[0].image_url);
     
     await message.reply(media);
+}
+
+async function animeData(message) {
+    const chat = await message.getChat();
+    const contact = await message.getContact();
+
+    console.log(`${contact.id.user} ${chat.name} ${message.body}`);
+
+    var commandSplit = message.body.split(" ");
+    commandSplit.shift();
+    var animeName = commandSplit.join(" ");
+
+    var response = await axios.get(`https://api.jikan.moe/v4/anime?q=${animeName}&sfw`);
+
+    if(response.data.data.length > 0) {
+        var anime = response.data.data[0];
+
+        var animeSummary = {
+            title: anime.titles[0].title,
+            episodes: anime.episodes,
+            score: anime.score,
+            image: anime.images.jpg.image_url,
+            synopsis: anime.synopsis
+        }
+
+        if(animeSummary.image) {
+            const media = await MessageMedia.fromUrl(animeSummary.image);
+
+            await chat.sendMessage(`*${animeSummary.title}*\n\n*Episódios*: ${animeSummary.episodes}\n*Nota*: ${animeSummary.score}\n\n${animeSummary.synopsis}`,
+                {media: media}
+            );
+        } else {
+            await message.reply(`*${animeSummary.title}*\n\n*Episódios*: ${animeSummary.episodes}\n*Nota*: ${animeSummary.score}\n\n${animeSummary.synopsis}`);
+        }
+    } else {
+        await message.reply("Não encontrei nenhum anime com esse nome");
+        return;
+    }
 }
