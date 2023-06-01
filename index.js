@@ -174,7 +174,8 @@ async function animeData(message) {
         var anime = response.data.data[0];
 
         var animeSummary = {
-            title: anime.titles[0].title,
+            title: anime.title,
+            title_english: anime.title_english,
             episodes: anime.episodes,
             score: anime.score,
             image: anime.images.jpg.image_url,
@@ -184,11 +185,11 @@ async function animeData(message) {
         if(animeSummary.image) {
             const media = await MessageMedia.fromUrl(animeSummary.image);
 
-            await chat.sendMessage(`*${animeSummary.title}*\n\n*Episódios*: ${animeSummary.episodes}\n*Nota*: ${animeSummary.score}\n\n${animeSummary.synopsis}`,
+            await chat.sendMessage(`*${animeSummary.title}*\n_${animeSummary.title_english}_\n\n*Episódios*: ${animeSummary.episodes}\n*Nota*: ${animeSummary.score}\n\n${animeSummary.synopsis}`,
                 {media: media}
             );
         } else {
-            await message.reply(`*${animeSummary.title}*\n\n*Episódios*: ${animeSummary.episodes}\n*Nota*: ${animeSummary.score}\n\n${animeSummary.synopsis}`);
+            await message.reply(`*${animeSummary.title}*\n_${animeSummary.title_english}_\n\n*Episódios*: ${animeSummary.episodes}\n*Nota*: ${animeSummary.score}\n\n${animeSummary.synopsis}`);
         }
     } else {
         await message.reply("Não encontrei nenhum anime com esse nome");
