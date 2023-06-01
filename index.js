@@ -1,6 +1,7 @@
 const qrcode = require('qrcode-terminal');
 const fs = require('fs')
 const axios = require('axios');
+const { translate } = require('free-translate');
 
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const { YoutubeMusicDownloader } = require('./YoutubeMusicDownloader.js');
@@ -172,24 +173,33 @@ async function animeData(message) {
 
     if(response.data.data.length > 0) {
         var anime = response.data.data[0];
+        var synopsis = "";
+        var title = "";
+
+        if(anime.title_english) {
+            title = await translate(anime.title_english, { from: 'en', to: 'pt' });
+        }
+
+        synopsis = await translate(anime.synopsis, { from: 'en', to: 'pt' });
 
         var animeSummary = {
             title: anime.title,
-            title_english: anime.title_english,
+            title_portuguese: title ?? "",
+            title_english: anime.title_english ?? "",
             episodes: anime.episodes,
             score: anime.score,
             image: anime.images.jpg.image_url,
-            synopsis: anime.synopsis
+            synopsis: synopsis != "" ? synopsis : anime.synopsis
         }
 
         if(animeSummary.image) {
             const media = await MessageMedia.fromUrl(animeSummary.image);
 
-            await chat.sendMessage(`*${animeSummary.title}*\n_${animeSummary.title_english}_\n\n*Episódios*: ${animeSummary.episodes}\n*Nota*: ${animeSummary.score}\n\n${animeSummary.synopsis}`,
+            await chat.sendMessage(`*${animeSummary.title}*\n_${animeSummary.title_english}_\n~${animeSummary.title_portuguese}~\n\n*Episódios*: ${animeSummary.episodes}\n*Nota*: ${animeSummary.score}\n\n${animeSummary.synopsis}`,
                 {media: media}
             );
         } else {
-            await message.reply(`*${animeSummary.title}*\n_${animeSummary.title_english}_\n\n*Episódios*: ${animeSummary.episodes}\n*Nota*: ${animeSummary.score}\n\n${animeSummary.synopsis}`);
+            await message.reply(`*${animeSummary.title}*\n_${animeSummary.title_english}_\n~${animeSummary.title_portuguese}~\n\n*Episódios*: ${animeSummary.episodes}\n*Nota*: ${animeSummary.score}\n\n${animeSummary.synopsis}`);
         }
     } else {
         await message.reply("Não encontrei nenhum anime com esse nome");
