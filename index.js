@@ -24,13 +24,13 @@ client.on('ready', () => {
 });
 
 client.on('message_create', async (message) => {
-	await treatMessage(message);
+	await handleMessage(message);
 });
  
 client.initialize();
 
 
-async function treatMessage(message) {
+async function handleMessage(message) {
     if(message.body.startsWith(prefix)){
         var messageCommand = message.body.split(" ")[0].split(prefix)[1];
         commands.forEach(async (command) => {
