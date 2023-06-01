@@ -5,7 +5,7 @@ class YoutubeMusicDownloader {
     async download(videoName) {
         const downloader = new Downloader({
             outputDir: './files',
-            getTags: true,
+            getTags: false,
         });
 
         const videoData = await this.searchYoutubeVideo(videoName);
@@ -23,7 +23,7 @@ class YoutubeMusicDownloader {
                 if(e instanceof YtdlMp3Error) {
                     return {
                         error: true,
-                        message: "Restrição de idade, ta querendo ver +18?"
+                        message: "Não consegui baixar não, pode ser que tenha restrição de idade"
                     }
                 }
             }
