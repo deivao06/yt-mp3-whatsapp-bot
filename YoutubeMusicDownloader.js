@@ -16,7 +16,6 @@ class YoutubeMusicDownloader {
         
                 return {
                     error: false,
-                    name: videoData.name,
                     path: path
                 }
             } catch (e) {
@@ -29,6 +28,29 @@ class YoutubeMusicDownloader {
             }
         } else {
             return videoData;
+        }
+    }
+
+    async downloadFromUrl(videoUrl) {
+        const downloader = new Downloader({
+            outputDir: './files',
+            getTags: false,
+        });
+
+        try {
+            const path = await downloader.downloadSong(videoUrl);
+    
+            return {
+                error: false,
+                path: path
+            }
+        } catch (e) {
+            if(e instanceof YtdlMp3Error) {
+                return {
+                    error: true,
+                    message: "Não consegui baixar não, pode ser que tenha restrição de idade"
+                }
+            }
         }
     }
   
