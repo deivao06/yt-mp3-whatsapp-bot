@@ -15,7 +15,9 @@ You can change {prefix} in index.js, by now it is "!"
 | {prefix}roll      | Roll a dice | !roll 1d6 |
 | {prefix}timetoduel  | Random Yugioh card | |
 | {prefix}anime      | Get anime info from MyAnimeList | !anime Boku no Hero |
+| {prefix}animem      | Get anime movies info from MyAnimeList | !animem Dragon Ball |
 | {prefix}sticker      | Get a image and send it back as sticker | |
+| {prefix}movie      | Get movies info from IMDB | !movie Avengers |
 
 ## Running on Localhost
 
