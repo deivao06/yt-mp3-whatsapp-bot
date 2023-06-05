@@ -13,7 +13,9 @@ const commands = [
     {"everyone": async (message) => {return await mentionEveryone(message)}},
     {"roll": async (message) => {return await rollDice(message)}},
     {"timetoduel": async (message) => {return await randomYugiohCard(message)}},
-    {"anime": async (message) => {return await animeData(message)}},
+    {"anime": async (message) => {return await animeData(message, "tv")}},
+    {"animem": async (message) => {return await animeData(message, "movie")}},
+    {"movie": async (message) => {return await movieData(message)}},
     {"sticker": async (message) => {return await imageToGif(message)}}
 ]
 
@@ -160,7 +162,7 @@ async function randomYugiohCard(message) {
     await message.reply(media);
 }
 
-async function animeData(message) {
+async function animeData(message, type) {
     const chat = await message.getChat();
     const contact = await message.getContact();
 
@@ -170,7 +172,7 @@ async function animeData(message) {
     commandSplit.shift();
     var animeName = commandSplit.join(" ");
 
-    var response = await axios.get(`https://api.jikan.moe/v4/anime?q=${animeName}`);
+    var response = await axios.get(`https://api.jikan.moe/v4/anime?q=${animeName}&type=${type}`);
 
     if(response.data.data.length > 0) {
         var anime = response.data.data[0];
@@ -181,7 +183,9 @@ async function animeData(message) {
             title = await translate(anime.title_english, { from: 'en', to: 'pt' });
         }
 
-        synopsis = await translate(anime.synopsis, { from: 'en', to: 'pt' });
+        if(anime.synopsis) {
+            synopsis = await translate(anime.synopsis, { from: 'en', to: 'pt' });
+        }
 
         var animeSummary = {
             title: `*${anime.title}*`,
@@ -205,6 +209,43 @@ async function animeData(message) {
     } else {
         await message.reply("Não encontrei nenhum anime com esse nome");
         return;
+    }
+}
+
+async function movieData(message) {
+    const chat = await message.getChat();
+    const contact = await message.getContact();
+
+    console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+
+    var commandSplit = message.body.split(" ");
+    commandSplit.shift();
+    var movieName = commandSplit.join(" ");
+
+    var response = await axios.get(`https://search.imdbot.workers.dev/?q=${movieName}`);
+
+    if(response.data.ok && response.data.description.length > 0) {
+        var movieSummary = {};
+
+        var movie = response.data.description[0];
+        movieSummary = {
+            title: movie['#TITLE'],
+            year: movie['#YEAR'],
+            url: movie['#IMDB_URL'],
+            image: movie['#IMG_POSTER']
+        }
+
+        if(movieSummary.image) {
+            const media = await MessageMedia.fromUrl(movieSummary.image);
+    
+            await chat.sendMessage(`*${movieSummary.title}*\n*Ano:* ${movieSummary.year}\n*Url:* ${movieSummary.url}`,
+                {media: media}
+            );
+        } else {
+            await message.reply("Não encontrei imagem para esse filme, então nem compensa mandar nada");
+        }
+    } else {
+        await message.reply("Não encontrei nenhum filme com esse nome");
     }
 }
 
