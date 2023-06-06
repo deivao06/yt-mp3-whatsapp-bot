@@ -17,7 +17,7 @@ const commands = [
     {"animem": async (message) => {return await animeData(message, "movie")}},
     {"movie": async (message) => {return await movieData(message)}},
     {"sticker": async (message) => {return await imageToGif(message)}},
-    {"pkm": async (message) => {return await randomPokemon(message)}}
+    {"pkm": async (message) => {return await pokemon(message)}}
 ]
 
 const client = new Client({
@@ -264,16 +264,30 @@ async function imageToGif(message) {
     }
 }
 
-async function randomPokemon(message) {
+async function pokemon(message) {
     const chat = await message.getChat();
     const contact = await message.getContact();
 
     console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
-    
-    var pokemonTotalResponse = await axios.get(`https://pokeapi.co/api/v2/pokemon?limit=2000`);
-    var randomPokemon = rand(pokemonTotalResponse.data.results);
 
-    var pokemonResponse = await axios.get(randomPokemon.url);
+    var commandSplit = message.body.split(" ");
+    commandSplit.shift();
+    var pokemonName = commandSplit.join(" ");
+
+    try {
+        if(pokemonName.trim()) {
+            var pokemonResponse = await axios.get(`https://pokeapi.co/api/v2/pokemon/${pokemonName.toLowerCase()}`);
+        } else {
+            var pokemonTotalResponse = await axios.get(`https://pokeapi.co/api/v2/pokemon?limit=2000`);
+            var randomPokemon = rand(pokemonTotalResponse.data.results);
+        
+            var pokemonResponse = await axios.get(randomPokemon.url);
+        }
+    } catch (e) {
+        message.reply("Não encontrei nenhum pokemon com este nome")
+        return;
+    }
+
     var pokemonSpeciesResponse = await axios.get(pokemonResponse.data.species.url);
 
     var pokemonNameObject = pokemonSpeciesResponse.data.names.filter(obj => {
@@ -294,7 +308,7 @@ async function randomPokemon(message) {
     if(pokemonSummary.sprite) {
         const media = await MessageMedia.fromUrl(pokemonSummary.sprite);
 
-        var responseMessage = `*${pokemonSummary.name}*\n\n*Tipos*\n`;
+        var responseMessage = `*${pokemonSummary.name}*\n\n_Altura:_ ${pokemonSummary.height}\n_Peso:_ ${pokemonSummary.weight}\n\n*Tipos*\n`;
         var types = pokemonSummary.types.length > 1 ? `_${pokemonSummary.types[0].type.name}_ | _${pokemonSummary.types[1].type.name}_` : `_${pokemonSummary.types[0].type.name}_`;
     
         responseMessage += `${types}\n\n`;
