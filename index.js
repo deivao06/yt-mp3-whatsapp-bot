@@ -16,7 +16,8 @@ const commands = [
     {"anime": async (message) => {return await animeData(message, "tv")}},
     {"animem": async (message) => {return await animeData(message, "movie")}},
     {"movie": async (message) => {return await movieData(message)}},
-    {"sticker": async (message) => {return await imageToGif(message)}}
+    {"sticker": async (message) => {return await imageToGif(message)}},
+    {"pkm": async (message) => {return await randomPokemon(message)}}
 ]
 
 const client = new Client({
@@ -257,8 +258,62 @@ async function imageToGif(message) {
     
     if(message.hasMedia) {
         const media = await message.downloadMedia();
-        await chat.sendMessage(media, {sendMediaAsSticker: true, stickerAuthor: "Robo", stickerName: "imagem", stickerCategories: []});
+        await chat.sendMessage(media, {sendMediaAsSticker: true, stickerAuthor: "Sticker", stickerName: "Sticker", stickerCategories: []});
     } else {
         message.reply("Tem que mandar uma imagem junto com a mensagem");
     }
+}
+
+async function randomPokemon(message) {
+    const chat = await message.getChat();
+    const contact = await message.getContact();
+
+    console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+    
+    var pokemonTotalResponse = await axios.get(`https://pokeapi.co/api/v2/pokemon?limit=2000`);
+    var randomPokemon = rand(pokemonTotalResponse.data.results);
+
+    var pokemonResponse = await axios.get(randomPokemon.url);
+    var pokemonSpeciesResponse = await axios.get(pokemonResponse.data.species.url);
+
+    var pokemonNameObject = pokemonSpeciesResponse.data.names.filter(obj => {
+        return obj.language.name === "en";
+    });
+
+    var pokemonSummary = {
+        id: pokemonResponse.data.id,
+        order: pokemonResponse.data.order,
+        name: pokemonNameObject[0].name,
+        height: pokemonResponse.data.height,
+        weight: pokemonResponse.data.weight,
+        sprite: pokemonResponse.data.sprites.other['official-artwork'].front_default,
+        stats: pokemonResponse.data.stats,
+        types: pokemonResponse.data.types
+    }
+
+    if(pokemonSummary.sprite) {
+        const media = await MessageMedia.fromUrl(pokemonSummary.sprite);
+
+        var responseMessage = `*${pokemonSummary.name}*\n\n*Tipos*\n`;
+        var types = pokemonSummary.types.length > 1 ? `_${pokemonSummary.types[0].type.name}_ | _${pokemonSummary.types[1].type.name}_` : `_${pokemonSummary.types[0].type.name}_`;
+    
+        responseMessage += `${types}\n\n`;
+        responseMessage += "*Status*\n"
+
+        pokemonSummary.stats.forEach((stat, index) => {
+            if(index == pokemonSummary.stats.length - 1) {
+                responseMessage += `_${stat.stat.name}_: ${stat.base_stat}`;
+            } else {
+                responseMessage += `_${stat.stat.name}_: ${stat.base_stat}\n`;
+            }
+        })
+
+        await chat.sendMessage(media, {sendMediaAsSticker: true, stickerAuthor: "Sticker", stickerName: "Sticker", stickerCategories: []});
+        await chat.sendMessage(`${responseMessage}\n\n @${contact.id.user}`, {mentions: [contact]});
+    }
+}
+
+function rand(items) {
+    // "|" for a kinda "int div"
+    return items[items.length * Math.random() | 0];
 }
