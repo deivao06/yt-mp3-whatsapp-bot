@@ -2,6 +2,7 @@ const qrcode = require('qrcode-terminal');
 const fs = require('fs')
 const axios = require('axios');
 const { translate } = require('free-translate');
+const sqlite3 = require('sqlite3').verbose();
 
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const { YoutubeMusicDownloader } = require('./YoutubeMusicDownloader.js');
@@ -17,7 +18,9 @@ const commands = [
     {"animem": async (message) => {return await animeData(message, "movie")}},
     {"movie": async (message) => {return await movieData(message)}},
     {"sticker": async (message) => {return await imageToGif(message)}},
-    {"pkm": async (message) => {return await pokemon(message)}}
+    {"pkm": async (message) => {return await pokemon(message)}},
+    // {"register": async (message) => {return await registerUsers(message)}}
+    {"repeteco": async (message) => {return await repeteco(message)}}
 ]
 
 const client = new Client({
@@ -324,6 +327,115 @@ async function pokemon(message) {
 
         await chat.sendMessage(media, {sendMediaAsSticker: true, stickerAuthor: "Sticker", stickerName: "Sticker", stickerCategories: []});
         await chat.sendMessage(`${responseMessage}\n\n @${contact.id.user}`, {mentions: [contact]});
+    }
+}
+
+async function registerUsers(message) {
+    const chat = await message.getChat();
+    const contact = await message.getContact();
+
+    console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+
+    var db = new sqlite3.Database(`./database/bot.db`, (err) => {
+        if (err) {
+          console.error(err.message);
+        }
+    });
+
+    for(var participant of chat.participants) {
+        const chatContact = await client.getContactById(participant.id._serialized);
+
+        db.all(`SELECT * FROM users WHERE contact_id = ?`, [chatContact.id.user], (err, rows) => {
+            if (err) {
+                throw err;
+            }
+
+            if(rows.length == 0) {
+                db.run(`INSERT INTO users (contact_id) VALUES (?)`, [chatContact.id.user], function(err) {
+                    if (err) {
+                        throw err;
+                    }
+                });
+            }
+        });
+    }
+
+    db.close();
+
+    message.reply("Todos os contatos deste grupo foram cadastrados com sucesso!");
+}
+
+async function repeteco(message) {
+    const chat = await message.getChat();
+    const contact = await message.getContact();
+
+    console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+
+    const mentions = await message.getMentions();
+
+    if(mentions.length > 0) {
+        var mentionedContact = mentions[0];
+        
+        var db = new sqlite3.Database(`./database/bot.db`, (err) => {
+            if (err) {
+              console.error(err.message);
+            }
+        });
+
+        db.all(`SELECT * FROM users WHERE contact_id = ?`, [mentionedContact.id.user], (err, rows) => {
+            if (err) {
+                throw err;
+            }
+
+            if(rows.length == 0) {
+                db.run(`INSERT INTO users (contact_id) VALUES (?)`, [mentionedContact.id.user], function(err) {
+                    if (err) {
+                        throw err;
+                    }
+                });
+
+                db.all(`SELECT id FROM users WHERE contact_id = ?`, [mentionedContact.id.user], function (err, rows) {
+                    if (err) {
+                        throw err;
+                    }
+
+                    if(rows.length > 0) {
+                        var userId = rows[0].id;
+
+                        db.run(`INSERT INTO repeteco (user_id) VALUES (?)`, [userId], function(err) {
+                            if (err) {
+                                throw err;
+                            }
+                        });
+
+                        db.all(`SELECT * FROM repeteco WHERE user_id = ?`, [userId], async (err, rows) => {
+                            await chat.sendMessage(`@${mentionedContact.id.user} ja enviou *${rows.length}* repeteco(s)`, {mentions: [mentionedContact]});
+                        })
+                    }
+                });
+            } else {
+                var userId = rows[0].id;
+
+                db.run(`INSERT INTO repeteco (user_id) VALUES (?)`, [userId], function(err) {
+                    if (err) {
+                        throw err;
+                    }
+                });
+
+                db.all(`SELECT * FROM repeteco WHERE user_id = ?`, [userId], async (err, rows) => {
+                    var s = "";
+                    if(rows.length > 1) {
+                        s = "s";
+                    }
+
+                    await chat.sendMessage(`@${mentionedContact.id.user} ja enviou *${rows.length}* repeteco${s}`, {mentions: [mentionedContact]});
+                })
+            }
+        });
+
+        db.close();
+    } else {
+        message.reply("Precisa mencionar algum contato");
     }
 }
 
