@@ -92,6 +92,7 @@ async function downloadAndSendYoutubeMp3(message) {
 async function mentionEveryone(message) {
     const chat = await message.getChat();
     const contact = await message.getContact();
+    console.log(chat.id);
 
     console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
 
