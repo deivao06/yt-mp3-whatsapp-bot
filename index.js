@@ -20,7 +20,8 @@ const commands = [
     {"sticker": async (message) => {return await imageToGif(message)}},
     {"pkm": async (message) => {return await pokemon(message)}},
     // {"register": async (message) => {return await registerUsers(message)}}
-    {"repeteco": async (message) => {return await repeteco(message)}}
+    {"repeteco": async (message) => {return await repeteco(message)}},
+    {"snap": async (message) => {return await marvelSnapCardData(message)}}
 ]
 
 const client = new Client({
@@ -324,6 +325,35 @@ async function pokemon(message) {
                 responseMessage += `_${stat.stat.name}_: ${stat.base_stat}\n`;
             }
         })
+
+        await chat.sendMessage(media, {sendMediaAsSticker: true, stickerAuthor: "Sticker", stickerName: "Sticker", stickerCategories: []});
+        await chat.sendMessage(`${responseMessage}\n\n @${contact.id.user}`, {mentions: [contact]});
+    }
+}
+
+async function marvelSnapCardData(message) {
+    const chat = await message.getChat();
+    const contact = await message.getContact();
+
+    var commandSplit = message.body.split(" ");
+    commandSplit.shift();
+    var cardName = commandSplit.join(" ");
+
+    console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+
+    var response = await axios.get(`https://marvelsnap.io/api/search.php?database&n=${cardName}`);
+
+    if(response.data.error) {
+        message.reply("Nenhum card encontrado com este nome!");
+    } else {
+        var card = response.data.card[0];
+        const media = await MessageMedia.fromUrl(`https://images.marvelsnap.io/images/cards/${card.id}.webp`);
+
+        var responseMessage = `*${card.name}*\n\n_"${card.ability}"_`;
+
+        if(card.method) {
+            responseMessage += `\n\n${card.method}`
+        }
 
         await chat.sendMessage(media, {sendMediaAsSticker: true, stickerAuthor: "Sticker", stickerName: "Sticker", stickerCategories: []});
         await chat.sendMessage(`${responseMessage}\n\n @${contact.id.user}`, {mentions: [contact]});
