@@ -341,15 +341,28 @@ async function marvelSnapCardData(message) {
 
     console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
 
-    var response = await axios.get(`https://marvelsnap.io/api/search.php?database&n=${cardName}`);
+    if(!cardName.trim()) {
+        message.reply("Nenhum card encontrado com este nome");
+        return;
+    }
 
-    if(response.data.error) {
-        message.reply("Nenhum card encontrado com este nome!");
-    } else {
+    var response = await axios.get(`https://marvelsnap.io/api/search.php?database&n=${cardName}`).catch(error => {
+        if(error.response.status == 400){
+            message.reply("Nenhum card encontrado com este nome");
+        }
+
+        return error.response;
+    });
+
+    if(response.status == 200) {
         var card = response.data.card[0];
         const media = await MessageMedia.fromUrl(`https://images.marvelsnap.io/images/cards/${card.id}.webp`);
 
-        var responseMessage = `*${card.name}*\n\n_"${card.ability}"_`;
+        var responseMessage = `*${card.name}*`;
+
+        if(card.ability) {
+            responseMessage += `\n\n_"${card.ability}"_`;
+        }
 
         if(card.method) {
             responseMessage += `\n\n${card.method}`
