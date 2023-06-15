@@ -442,7 +442,7 @@ async function ficha(message) {
         console.log(fichaString);
 
         try {
-            var ficha = JSON.parse(`${fichaString}`);
+            var ficha = JSON.parse("'" + fichaString + "'");
     
             if(ficha instanceof Object) {
                 var mentionedContact = mentions[0];
