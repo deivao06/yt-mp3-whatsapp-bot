@@ -6,8 +6,15 @@ const sqlite3 = require('sqlite3').verbose();
 
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const { YoutubeMusicDownloader } = require('./YoutubeMusicDownloader.js');
+const { UsersRepository } = require('./repositories/UsersRepository.js');
+const { RepetecosRepository } = require('./repositories/RepetecosRepository.js');
+const { FichasRepository } = require('./repositories/FichasRepository.js');
 
 const yt = new YoutubeMusicDownloader();
+const usersRepository = new UsersRepository();
+const repetecosRepository = new RepetecosRepository();
+const fichasRepository = new FichasRepository();
+
 const prefix = "!";
 const commands = [
     {"p": async (message) => {return await downloadAndSendYoutubeMp3(message)}},
@@ -19,9 +26,10 @@ const commands = [
     {"movie": async (message) => {return await movieData(message)}},
     {"sticker": async (message) => {return await imageToGif(message)}},
     {"pkm": async (message) => {return await pokemon(message)}},
-    // {"register": async (message) => {return await registerUsers(message)}}
+    // {"register": async (message) => {return await registerUsers(message)}},
     {"repeteco": async (message) => {return await repeteco(message)}},
-    {"snap": async (message) => {return await marvelSnapCardData(message)}}
+    {"snap": async (message) => {return await marvelSnapCardData(message)}},
+    {"ficha": async (message) => {return await ficha(message)}},
 ]
 
 const client = new Client({
@@ -379,33 +387,9 @@ async function registerUsers(message) {
 
     console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
 
-    var db = new sqlite3.Database(`./database/bot.db`, (err) => {
-        if (err) {
-          console.error(err.message);
-        }
-    });
-
-    for(var participant of chat.participants) {
-        const chatContact = await client.getContactById(participant.id._serialized);
-
-        db.all(`SELECT * FROM users WHERE contact_id = ?`, [chatContact.id.user], (err, rows) => {
-            if (err) {
-                throw err;
-            }
-
-            if(rows.length == 0) {
-                db.run(`INSERT INTO users (contact_id) VALUES (?)`, [chatContact.id.user], function(err) {
-                    if (err) {
-                        throw err;
-                    }
-                });
-            }
-        });
-    }
-
-    db.close();
-
-    message.reply("Todos os contatos deste grupo foram cadastrados com sucesso!");
+    await usersRepository.registerUsers(chat.participants, client, function(response) {
+        message.reply(response.message);
+    })
 }
 
 async function repeteco(message) {
@@ -417,68 +401,65 @@ async function repeteco(message) {
     const mentions = await message.getMentions();
 
     if(mentions.length > 0) {
-        var mentionedContact = mentions[0];
-        
-        var db = new sqlite3.Database(`./database/bot.db`, (err) => {
-            if (err) {
-              console.error(err.message);
-            }
-        });
-
-        db.all(`SELECT * FROM users WHERE contact_id = ?`, [mentionedContact.id.user], (err, rows) => {
-            if (err) {
-                throw err;
-            }
-
-            if(rows.length == 0) {
-                db.run(`INSERT INTO users (contact_id) VALUES (?)`, [mentionedContact.id.user], function(err) {
-                    if (err) {
-                        throw err;
-                    }
-                });
-
-                db.all(`SELECT id FROM users WHERE contact_id = ?`, [mentionedContact.id.user], function (err, rows) {
-                    if (err) {
-                        throw err;
-                    }
-
-                    if(rows.length > 0) {
-                        var userId = rows[0].id;
-
-                        db.run(`INSERT INTO repeteco (user_id) VALUES (?)`, [userId], function(err) {
-                            if (err) {
-                                throw err;
-                            }
-                        });
-
-                        db.all(`SELECT * FROM repeteco WHERE user_id = ?`, [userId], async (err, rows) => {
-                            await chat.sendMessage(`@${mentionedContact.id.user} ja enviou *${rows.length}* repeteco(s)`, {mentions: [mentionedContact]});
-                        })
-                    }
-                });
-            } else {
-                var userId = rows[0].id;
-
-                db.run(`INSERT INTO repeteco (user_id) VALUES (?)`, [userId], function(err) {
-                    if (err) {
-                        throw err;
-                    }
-                });
-
-                db.all(`SELECT * FROM repeteco WHERE user_id = ?`, [userId], async (err, rows) => {
-                    var s = "";
-                    if(rows.length > 1) {
-                        s = "s";
-                    }
-
-                    await chat.sendMessage(`@${mentionedContact.id.user} ja enviou *${rows.length}* repeteco${s}`, {mentions: [mentionedContact]});
-                })
-            }
-        });
-
-        db.close();
+        await repetecosRepository.registerRepeteco(mentions, chat);
     } else {
         message.reply("Precisa mencionar algum contato");
+    }
+}
+
+async function ficha(message) {
+    const chat = await message.getChat();
+    const contact = await message.getContact();
+
+    console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+
+    const mentions = await message.getMentions();
+
+    if(mentions.length == 0) {
+        message.reply("Precisa mencionar algum contato");
+        return;  
+    }
+
+    var commandSplit = message.body.split(" ");
+    commandSplit.splice(0, 2);
+
+    var fichaString = commandSplit.join(" ");
+
+    if(!fichaString) {
+        var mentionedContact = mentions[0];
+        await fichasRepository.getFicha(mentionedContact, async function(response) {
+            if(response.error) {
+                message.reply(response.message);
+                return;
+            } else {
+                var ficha = response.ficha;
+
+                var responseMessage = `Ficha do @${mentionedContact.id.user}\n\n Classe: ${ficha.class}\nAlinhamento: ${ficha.alignment}\nForça: ${ficha.strenght}\nDestreza: ${ficha.dexterity}\nConstituição: ${ficha.constitution}\nInteligência: ${ficha.intelligence}\nSabedoria: ${ficha.wisdom}\nCarisma: ${ficha.charism}\n`;
+                await chat.sendMessage(responseMessage, {mentions: [mentionedContact]});
+            }
+        });
+    } else {
+        console.log(fichaString);
+
+        try {
+            var ficha = JSON.parse(`${fichaString}`);
+    
+            if(ficha instanceof Object) {
+                var mentionedContact = mentions[0];
+                await fichasRepository.createFicha(ficha, mentionedContact, function(response) {
+                    message.reply(response.message);
+                    return;
+                });
+            } else {
+                message.reply("A ficha tem que ser um JSON");
+                return;
+            }
+        } catch (e) {
+            if(e instanceof SyntaxError) {
+                message.reply("O formato do JSON está errado");
+                return;
+            }
+        }
     }
 }
 

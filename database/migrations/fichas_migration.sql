@@ -1,7 +1,6 @@
--- SQLite
-DROP TABLE IF EXISTS ficha;
+DROP TABLE IF EXISTS fichas;
 
-CREATE TABLE ficha (
+CREATE TABLE fichas (
     id INTEGER PRIMARY KEY,
     user_id INTEGER,
     class TEXT NOT NULL,
