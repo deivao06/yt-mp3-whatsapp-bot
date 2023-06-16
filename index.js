@@ -29,7 +29,15 @@ const commands = [
     {"repeteco": async (message) => {return await repeteco(message)}},
     {"snap": async (message) => {return await marvelSnapCardData(message)}},
     {"ficha": async (message) => {return await ficha(message)}},
-]
+];
+const attributes = {
+    "str": "strength",
+    "dex": "dexterity",
+    "con": "constitution",
+    "int": "intelligence",
+    "wis": "wisdom",
+    "cha": "charism",
+}
 
 const client = new Client({
     authStrategy: new LocalAuth()
@@ -126,12 +134,14 @@ async function rollDice(message) {
     var commandSplit = message.body.split(" ");
     commandSplit.shift();
 
-    if(!regex.test(commandSplit.join(" "))) {
+    var dices = commandSplit[0];
+
+    if(!regex.test(commandSplit[0])) {
         await message.reply("Escreve direto, exemplo: 2d6 (2 dados de 6 lados)");
         return;
     }
 
-    var dices = commandSplit.join(" ").split("d");
+    dices = dices.split("d");
 
     var diceQtd = dices[0];
     var diceType = dices[1];
@@ -139,6 +149,28 @@ async function rollDice(message) {
     if(diceQtd <= 0 || diceType <= 0) {
         await message.reply("Escreve direto, não existe dado 0");
         return;
+    }
+
+    var modificadorDado = null;
+
+    if(commandSplit[1]) {
+        var requestAtributo = commandSplit[1].trim();
+        var attribute = attributes[requestAtributo];
+
+        if(attribute) {
+            var ficha = await fichasRepository.getFicha(contact);
+
+            if(ficha) {
+                var fichaAttribute = ficha[attribute];
+                modificadorDado = modificador(fichaAttribute);
+            } else {
+                await message.reply("Nenhuma ficha encontrada para este contato");
+                return;
+            }
+        } else {
+            await message.reply("Este atributo não existe");
+            return;
+        }
     }
 
     var response = await axios.get(`https://www.dejete.com/api?nbde=${diceQtd}&tpde=${diceType}`);
@@ -157,6 +189,10 @@ async function rollDice(message) {
     })
 
     result += ` = ${sum}`;
+
+    if(modificadorDado) {
+        result += ` + (${modificadorDado}) = ${sum + modificadorDado}`
+    }
 
     await message.reply(result);
 }
@@ -427,17 +463,33 @@ async function ficha(message) {
 
     const mentions = await message.getMentions();
 
-    if(mentions.length == 0) {
-        message.reply("Precisa mencionar algum contato");
-        return;  
-    }
-
     var commandSplit = message.body.split(" ");
+
     commandSplit.splice(0, 2);
 
     var fichaString = commandSplit.join(" ");
 
-    if(!fichaString) {
+    if(mentions.length == 0 && !fichaString) {
+        var ficha = await fichasRepository.getFicha(contact);
+        
+        if(ficha) {
+            var responseMessage = `*Ficha do @${contact.id.user}*\n\n`;
+            responseMessage += `*Classe:* ${ficha.class}\n`
+            responseMessage += `*Alinhamento:* ${ficha.alignment}\n`
+            responseMessage += `*Força:* ${ficha.strength} | _${modificador(ficha.strength)}_\n`
+            responseMessage += `*Destreza:* ${ficha.dexterity} | _${modificador(ficha.dexterity)}_\n`
+            responseMessage += `*Constituição:* ${ficha.constitution} | _${modificador(ficha.constitution)}_\n`
+            responseMessage += `*Inteligência:* ${ficha.intelligence} | _${modificador(ficha.intelligence)}_\n`
+            responseMessage += `*Sabedoria:* ${ficha.wisdom} | _${modificador(ficha.wisdom)}_\n`
+            responseMessage += `*Carisma:* ${ficha.charism} | _${modificador(ficha.charism)}_\n`;
+
+            await chat.sendMessage(responseMessage, {mentions: [contact]});
+            return;
+        } else {
+            await message.reply("Nenhuma ficha encontrada para este contato");
+            return
+        }
+    } else if (!fichaString) {
         var mentionedContact = mentions[0];
 
         var ficha = await fichasRepository.getFicha(mentionedContact);
@@ -446,12 +498,12 @@ async function ficha(message) {
             var responseMessage = `*Ficha do @${mentionedContact.id.user}*\n\n`;
             responseMessage += `*Classe:* ${ficha.class}\n`
             responseMessage += `*Alinhamento:* ${ficha.alignment}\n`
-            responseMessage += `*Força:* ${ficha.strength} | _${Math.floor(ficha.strength / 2) - 5}_\n`
-            responseMessage += `*Destreza:* ${ficha.dexterity} | _${Math.floor(ficha.dexterity / 2) - 5}_\n`
-            responseMessage += `*Constituição:* ${ficha.constitution} | _${Math.floor(ficha.constitution / 2) - 5}_\n`
-            responseMessage += `*Inteligência:* ${ficha.intelligence} | _${Math.floor(ficha.intelligence / 2) - 5}_\n`
-            responseMessage += `*Sabedoria:* ${ficha.wisdom} | _${Math.floor(ficha.wisdom / 2) - 5}_\n`
-            responseMessage += `*Carisma:* ${ficha.charism} | _${Math.floor(ficha.charism / 2) - 5}_\n`;
+            responseMessage += `*Força:* ${ficha.strength} | _${modificador(ficha.strength)}_\n`
+            responseMessage += `*Destreza:* ${ficha.dexterity} | _${modificador(ficha.dexterity)}_\n`
+            responseMessage += `*Constituição:* ${ficha.constitution} | _${modificador(ficha.constitution)}_\n`
+            responseMessage += `*Inteligência:* ${ficha.intelligence} | _${modificador(ficha.intelligence)}_\n`
+            responseMessage += `*Sabedoria:* ${ficha.wisdom} | _${modificador(ficha.wisdom)}_\n`
+            responseMessage += `*Carisma:* ${ficha.charism} | _${modificador(ficha.charism)}_\n`;
 
             await chat.sendMessage(responseMessage, {mentions: [mentionedContact]});
             return;
@@ -492,4 +544,8 @@ async function ficha(message) {
 function rand(items) {
     // "|" for a kinda "int div"
     return items[items.length * Math.random() | 0];
+}
+
+function modificador(attr) {
+    return Math.floor(attr / 2) - 5;
 }
