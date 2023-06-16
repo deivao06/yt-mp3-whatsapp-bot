@@ -5,7 +5,7 @@ CREATE TABLE fichas (
     user_id INTEGER,
     class TEXT NOT NULL,
     alignment TEXT NOT NULL,
-    strenght INTEGER DEFAULT 1,
+    strength INTEGER DEFAULT 1,
     dexterity INTEGER DEFAULT 1,
     constitution INTEGER DEFAULT 1,
     intelligence INTEGER DEFAULT 1,

@@ -1,52 +1,52 @@
 const sqlite3 = require('sqlite3').verbose();
+const { open } = require('sqlite');
 
 class UsersRepository {
     constructor() {
         this.table = 'users';
     }
 
-    connect() {
-        this.db = new sqlite3.Database(`./database/bot.sqlite`, (err) => {
-            if (err) {
-              console.error(err.message);
-            }
-        });
+    async connect() {
+        this.db = await open({
+            filename: `./database/bot.sqlite`,
+            driver: sqlite3.Database
+        })
     }
 
-    async registerUsers(chatParticipants, client, callback) {
-        this.connect();
+    async getUserByContactId(contactId) {
+        await this.connect();
+
+        const user = await this.db.get(`SELECT * FROM ${this.table} WHERE contact_id = ?`, [contactId]);
+
+        await this.close();
+
+        if(user) {
+            return user;
+        } else {
+            return false;
+        }
+    }
+
+    async registerUsers(chatParticipants, client) {
+        await this.connect();
 
         for(var participant of chatParticipants) {
             const chatContact = await client.getContactById(participant.id._serialized);
     
-            this.db.all(`SELECT * FROM ${this.table} WHERE contact_id = ?`, [chatContact.id.user], (err, rows) => {
-                if (err) {
-                    callback({error: true, message: err})
-                    return;
-                }
-    
-                if(rows.length == 0) {
-                    this.db.run(`INSERT INTO ${this.table} (contact_id) VALUES (?)`, [chatContact.id.user], function(err) {
-                        if (err) {
-                            callback({error: true, message: err});
-                            return;
-                        }
-                    });
-                }
-            });
+            var user = await this.db.get(`SELECT * FROM ${this.table} WHERE contact_id = ?`, [chatContact.id.user]);
+
+            if(!user) {
+                await this.db.run(`INSERT INTO ${this.table} (contact_id) VALUES (?)`, [chatContact.id.user]);
+            }
         }
 
-        callback({error: false, message: "Todos os contatos deste grupo foram cadastrados com sucesso"})
+        await this.close();
 
-        this.close();
+        return true;
     }
 
-    close() {
-        this.db.close((err) => {
-            if (err) {
-                console.error(err.message);
-            }
-        });
+    async close() {
+        await this.db.close();
     }
 }
 

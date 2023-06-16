@@ -1,145 +1,112 @@
+const { UsersRepository } = require('./UsersRepository');
+
 const sqlite3 = require('sqlite3').verbose();
+const { open } = require('sqlite');
 
 class FichasRepository {
     constructor() {
         this.table = 'fichas';
+        this.usersRepository = new UsersRepository();
     }
 
-    connect() {
-        this.db = new sqlite3.Database(`./database/bot.sqlite`, (err) => {
-            if (err) {
-              console.error(err.message);
-            }
-        });
-    }
-
-    async getFicha(mentionedContact, callback) {
-        this.connect();
-
-        this.db.all(`SELECT * FROM ${this.table} WHERE user_id = ?`, [mentionedContact.id.user], async (err, rows) => {
-            if(err) {
-                callback({error: true, message: err});
-            }
-
-            if(rows.length > 0) {
-                callback({error:false, message: "Ficha encontrada", ficha: rows[0]});
-                return;
-            } else {
-                callback({error: true, message: "Nenhuma ficha criada para este contato"});
-                return;
-            }
-            
+    async connect() {
+        this.db = await open({
+            filename: `./database/bot.sqlite`,
+            driver: sqlite3.Database
         })
-
-        this.close();
     }
 
-    async createFicha(ficha, mentionedContact, callback)
+    async getFicha(mentionedContact) {
+        var user = await this.usersRepository.getUserByContactId(mentionedContact.id.user);
+
+        await this.connect();
+
+        var ficha = await this.db.get(`SELECT * FROM ${this.table} WHERE user_id = ?`, [user.id]);
+
+        await this.close();
+
+        if(ficha){
+            return ficha;
+        } else {
+            return false;
+        }
+    }
+
+    async createOrUpdateFicha(fichaData, mentionedContact)
     {
-        this.connect();
+        await this.connect();
 
-        this.db.all(`SELECT * FROM users WHERE contact_id = ?`, [mentionedContact.id.user], (err, rows) => {
-            if (err) {
-                callback({error: true, message: err});
-                return;
-            }
+        var user = await this.usersRepository.getUserByContactId(mentionedContact.id.user);
 
-            if(rows.length == 0) {
-                this.db.run(`INSERT INTO users (contact_id) VALUES (?)`, [mentionedContact.id.user], function(err) {
-                    if (err) {
-                        callback({error: true, message: err});
-                        return;
-                    }
-                });
+        if(!user) {
+            await this.db.run(`INSERT INTO users (contact_id) VALUES (?)`, [mentionedContact.id.user]);
+            user = await this.usersRepository.getUserByContactId(mentionedContact.id.user);
+        }
 
-                this.db.all(`SELECT id FROM users WHERE contact_id = ?`, [mentionedContact.id.user], function (err, rows) {
-                    if (err) {
-                        callback({error: true, message: err});
-                        return;
-                    }
+        var fichaUser = await this.db.get(`SELECT * FROM ${this.table} WHERE user_id = ?`, [user.id]);
 
-                    if(rows.length > 0) {
-                        var userId = rows[0].id;
+        if(fichaUser) {
+            await this.db.run(`UPDATE ${this.table} SET
+                class = ?, 
+                alignment = ?, 
+                strength = ?, 
+                dexterity = ?, 
+                constitution = ?, 
+                intelligence = ?, 
+                wisdom = ?, 
+                charism = ?
+                WHERE id = ?`, 
+                [ 
+                    fichaData.class, 
+                    fichaData.align, 
+                    fichaData.str, 
+                    fichaData.dex, 
+                    fichaData.con, 
+                    fichaData.int,
+                    fichaData.wis,
+                    fichaData.cha,
+                    fichaUser.id
+                ]
+            );
+        } else {
+            await this.db.run(`INSERT INTO ${this.table} (
+                user_id, 
+                class, 
+                alignment, 
+                strength, 
+                dexterity, 
+                constitution, 
+                intelligence, 
+                wisdom, 
+                charism
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, 
+                [
+                    user.id, 
+                    fichaData.class, 
+                    fichaData.align, 
+                    fichaData.str, 
+                    fichaData.dex, 
+                    fichaData.con, 
+                    fichaData.int,
+                    fichaData.wis,
+                    fichaData.cha
+                ]
+            );
+        }
 
-                        this.db.run(`INSERT INTO ${this.table} (
-                            user_id, 
-                            class, 
-                            alignment, 
-                            strenght, 
-                            dexterity, 
-                            constitution, 
-                            intelligence, 
-                            wisdom, 
-                            charism
-                            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
-                                userId, 
-                                ficha.class, 
-                                ficha.align, 
-                                ficha.str, 
-                                ficha.dex, 
-                                ficha.con, 
-                                ficha.int,
-                                ficha.wis,
-                                ficha.cha
-                            ], function(err) {
-                            if (err) {
-                                callback({error: true, message: err});
-                                return;
-                            }
-                        });
+        const ficha = await this.db.get(`SELECT * FROM ${this.table} WHERE user_id = ?`, [user.id]);
 
-                        this.db.all(`SELECT * FROM ${this.table} WHERE user_id = ?`, [userId], async (err, rows) => {
-                            callback({error:false, message: "Ficha criada com sucesso", ficha: rows[0]});
-                            return;
-                        })
-                    }
-                });
-            } else {
-                var userId = rows[0].id;
+        await this.close();
 
-                this.db.run(`INSERT INTO ${this.table} (
-                    user_id, 
-                    class, 
-                    alignment, 
-                    strenght, 
-                    dexterity, 
-                    constitution, 
-                    intelligence, 
-                    wisdom, 
-                    charism
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`, [
-                        userId, 
-                        ficha.class, 
-                        ficha.align, 
-                        ficha.str, 
-                        ficha.dex, 
-                        ficha.con, 
-                        ficha.int,
-                        ficha.wis,
-                        ficha.cha
-                    ], function(err) {
-                    if (err) {
-                        callback({error: true, message: err});
-                        return;
-                    }
-                });
-
-                this.db.all(`SELECT * FROM ${this.table} WHERE user_id = ?`, [userId], async (err, rows) => {
-                    callback({error:false, message: "Ficha criada com sucesso", ficha: rows[0]});
-                    return;
-                })
-            }
-        });
-
-        this.close();
+        if(ficha) {
+            return ficha;
+        } else {
+            return false;
+        }
     }
 
-    close() {
-        this.db.close((err) => {
-            if (err) {
-                console.error(err.message);
-            }
-        });
+    async close() {
+        await this.db.close();
     }
 }
 

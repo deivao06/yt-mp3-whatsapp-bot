@@ -2,7 +2,6 @@ const qrcode = require('qrcode-terminal');
 const fs = require('fs')
 const axios = require('axios');
 const { translate } = require('free-translate');
-const sqlite3 = require('sqlite3').verbose();
 
 const { Client, LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const { YoutubeMusicDownloader } = require('./YoutubeMusicDownloader.js');
@@ -387,9 +386,13 @@ async function registerUsers(message) {
 
     console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
 
-    await usersRepository.registerUsers(chat.participants, client, function(response) {
-        message.reply(response.message);
-    })
+    var response = await usersRepository.registerUsers(chat.participants, client);
+
+    if(response) {
+        message.reply("Todos os contatos deste grupo foram cadastrados com sucesso");
+    } else {
+        message.reply("Falha ao cadastrar contatos");
+    }
 }
 
 async function repeteco(message) {
@@ -401,7 +404,16 @@ async function repeteco(message) {
     const mentions = await message.getMentions();
 
     if(mentions.length > 0) {
-        await repetecosRepository.registerRepeteco(mentions, chat);
+        var mentionedContact = mentions[0];
+        var repetecosCount = await repetecosRepository.registerRepeteco(mentionedContact);
+        var s = "";
+
+        if(repetecosCount > 1) {
+            s = "s";
+        }
+
+        await chat.sendMessage(`@${mentionedContact.id.user} ja enviou *${repetecosCount}* repeteco${s}`, {mentions: [mentionedContact]});
+        return;
     } else {
         message.reply("Precisa mencionar algum contato");
     }
@@ -427,35 +439,49 @@ async function ficha(message) {
 
     if(!fichaString) {
         var mentionedContact = mentions[0];
-        await fichasRepository.getFicha(mentionedContact, async function(response) {
-            if(response.error) {
-                message.reply(response.message);
-                return;
-            } else {
-                var ficha = response.ficha;
 
-                var responseMessage = `Ficha do @${mentionedContact.id.user}\n\n Classe: ${ficha.class}\nAlinhamento: ${ficha.alignment}\nForça: ${ficha.strenght}\nDestreza: ${ficha.dexterity}\nConstituição: ${ficha.constitution}\nInteligência: ${ficha.intelligence}\nSabedoria: ${ficha.wisdom}\nCarisma: ${ficha.charism}\n`;
-                await chat.sendMessage(responseMessage, {mentions: [mentionedContact]});
-            }
-        });
+        var ficha = await fichasRepository.getFicha(mentionedContact);
+        
+        if(ficha) {
+            var responseMessage = `*Ficha do @${mentionedContact.id.user}*\n\n`;
+            responseMessage += `*Classe:* ${ficha.class}\n`
+            responseMessage += `*Alinhamento:* ${ficha.alignment}\n`
+            responseMessage += `*Força:* ${ficha.strength} | _${Math.floor(ficha.strength / 2) - 5}_\n`
+            responseMessage += `*Destreza:* ${ficha.dexterity} | _${Math.floor(ficha.dexterity / 2) - 5}_\n`
+            responseMessage += `*Constituição:* ${ficha.constitution} | _${Math.floor(ficha.constitution / 2) - 5}_\n`
+            responseMessage += `*Inteligência:* ${ficha.intelligence} | _${Math.floor(ficha.intelligence / 2) - 5}_\n`
+            responseMessage += `*Sabedoria:* ${ficha.wisdom} | _${Math.floor(ficha.wisdom / 2) - 5}_\n`
+            responseMessage += `*Carisma:* ${ficha.charism} | _${Math.floor(ficha.charism / 2) - 5}_\n`;
+
+            await chat.sendMessage(responseMessage, {mentions: [mentionedContact]});
+            return;
+        }
+
+        await message.reply("Nenhuma ficha encontrada para este contato");
+        return;
     } else {
-        console.log(fichaString);
-
         try {
-            var ficha = JSON.parse("'" + fichaString + "'");
+            var ficha = JSON.parse(fichaString);
     
             if(ficha instanceof Object) {
                 var mentionedContact = mentions[0];
-                await fichasRepository.createFicha(ficha, mentionedContact, function(response) {
-                    message.reply(response.message);
+                var response = await fichasRepository.createOrUpdateFicha(ficha, mentionedContact);
+
+                if(response) {
+                    message.reply("Ficha criada com sucesso");
                     return;
-                });
+                } else {
+                    message.reply("Falha ao criar ficha");
+                    return;
+                }
             } else {
                 message.reply("A ficha tem que ser um JSON");
                 return;
             }
         } catch (e) {
             if(e instanceof SyntaxError) {
+                console.log(e);
+
                 message.reply("O formato do JSON está errado");
                 return;
             }

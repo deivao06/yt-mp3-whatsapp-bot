@@ -1,83 +1,42 @@
+const { UsersRepository } = require('./UsersRepository');
+
 const sqlite3 = require('sqlite3').verbose();
+const { open } = require('sqlite');
 
 class RepetecosRepository {
     constructor() {
         this.table = 'repetecos';
+        this.usersRepository = new UsersRepository();
     }
 
-    connect() {
-        this.db = new sqlite3.Database(`./database/bot.sqlite`, (err) => {
-            if (err) {
-              console.error(err.message);
-            }
-        });
+    async connect() {
+        this.db = await open({
+            filename: `./database/bot.sqlite`,
+            driver: sqlite3.Database
+        })
     }
 
-    async registerRepeteco(mentions, chat) {
-        var mentionedContact = mentions[0];
+    async registerRepeteco(mentionedContact) {
+        await this.connect();
 
-        this.connect();
+        var user = await this.usersRepository.getUserByContactId(mentionedContact.id.user);
 
-        this.db.all(`SELECT * FROM users WHERE contact_id = ?`, [mentionedContact.id.user], (err, rows) => {
-            if (err) {
-                throw err;
-            }
+        if(!user) {
+            await this.db.run(`INSERT INTO users (contact_id) VALUES (?)`, [mentionedContact.id.user]);
+            user = await this.usersRepository.getUserByContactId(mentionedContact.id.user);
+        }
 
-            if(rows.length == 0) {
-                this.db.run(`INSERT INTO users (contact_id) VALUES (?)`, [mentionedContact.id.user], function(err) {
-                    if (err) {
-                        throw err;
-                    }
-                });
+        await this.db.run(`INSERT INTO ${this.table} (user_id) VALUES (?)`, [user.id]);
 
-                this.db.all(`SELECT id FROM users WHERE contact_id = ?`, [mentionedContact.id.user], function (err, rows) {
-                    if (err) {
-                        throw err;
-                    }
+        var repetecos = await this.db.all(`SELECT * FROM ${this.table} WHERE user_id = ?`, [user.id]);
 
-                    if(rows.length > 0) {
-                        var userId = rows[0].id;
+        await this.close();
 
-                        this.db.run(`INSERT INTO ${this.table} (user_id) VALUES (?)`, [userId], function(err) {
-                            if (err) {
-                                throw err;
-                            }
-                        });
-
-                        this.db.all(`SELECT * FROM ${this.table} WHERE user_id = ?`, [userId], async (err, rows) => {
-                            await chat.sendMessage(`@${mentionedContact.id.user} ja enviou *${rows.length}* repetecos(s)`, {mentions: [mentionedContact]});
-                        })
-                    }
-                });
-            } else {
-                var userId = rows[0].id;
-
-                this.db.run(`INSERT INTO ${this.table} (user_id) VALUES (?)`, [userId], function(err) {
-                    if (err) {
-                        throw err;
-                    }
-                });
-
-                this.db.all(`SELECT * FROM ${this.table} WHERE user_id = ?`, [userId], async (err, rows) => {
-                    var s = "";
-                    if(rows.length > 1) {
-                        s = "s";
-                    }
-
-                    await chat.sendMessage(`@${mentionedContact.id.user} ja enviou *${rows.length}* repeteco${s}`, {mentions: [mentionedContact]});
-                })
-            }
-        });
-
-        this.close();
+        return repetecos.length;
     }
 
-    close() {
-        this.db.close((err) => {
-            if (err) {
-                console.error(err.message);
-            }
-        });
+    async close() {
+        await this.db.close();
     }
 }
 
