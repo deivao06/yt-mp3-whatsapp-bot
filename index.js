@@ -29,6 +29,7 @@ const commands = [
     {"repeteco": async (message) => {return await repeteco(message)}},
     {"snap": async (message) => {return await marvelSnapCardData(message)}},
     {"ficha": async (message) => {return await ficha(message)}},
+    {"trace": async (message) => {return await trace(message)}},
 ];
 const attributes = {
     "str": "strength",
@@ -65,7 +66,13 @@ async function handleMessage(message) {
             var commandFunction = command[messageCommand];
 
             if(commandFunction) {
+                const contact = await message.getContact();
+
                 await commandFunction(message);
+                // if(contact.id.user == '559181770303') {
+                //     await message.reply('Você está proibido de mandar comandos no bot');
+                // } else {
+                // }
             }
         })
     }
@@ -80,8 +87,7 @@ async function downloadAndSendYoutubeMp3(message) {
     var commandSplit = message.body.split(" ");
     commandSplit.shift();
     var videoNameOrUrl = commandSplit.join(" ");
-
-    await chat.sendMessage(`@${contact.id.user} Espera aí, to procurando ${videoNameOrUrl}`, {mentions: [contact]});
+    
     var videoData = null;
 
     if(videoNameOrUrl.startsWith("https")){
@@ -452,6 +458,52 @@ async function repeteco(message) {
         return;
     } else {
         message.reply("Precisa mencionar algum contato");
+    }
+}
+
+async function trace(message) {
+    const chat = await message.getChat();
+    const contact = await message.getContact();
+
+    console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+
+    if(message.hasMedia) {
+        const media = await message.downloadMedia();
+
+        fs.writeFileSync(
+            `./files/${media.filename}.jpg`,
+            media.data,
+            "base64",
+            function (err) {
+                if (err) {
+                    console.log(err);
+                }
+            }
+        )
+
+        try {
+            var response = await axios({
+                method: "post",
+                url: "https://api.trace.moe/search",
+                data: fs.readFileSync(`./files/${media.filename}.jpg`),
+            });
+
+            if(response.data.result.length > 0) {
+                var animeResult = response.data.result[0];
+                const mediaMoe = await MessageMedia.fromUrl(animeResult.video);
+                mediaMoe.filename = decodeURI(mediaMoe.filename);
+
+                await chat.sendMessage(`@${contact.id.user}`, { media: mediaMoe, sendMediaAsDocument: true, mentions: [contact] });
+                fs.unlinkSync(`./files/${media.filename}.jpg`)
+            }
+        } catch (e) {
+            console.log(e);
+            fs.unlinkSync(`./files/${media.filename}.jpg`)
+        }
+    } else if (message.hasQuotedMsg()) {
+
+    } else {
+        message.reply("Tem que mandar uma imagem junto com a mensagem");
     }
 }
 
