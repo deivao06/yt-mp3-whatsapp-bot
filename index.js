@@ -30,6 +30,7 @@ const commands = [
     {"snap": async (message) => {return await marvelSnapCardData(message)}},
     {"ficha": async (message) => {return await ficha(message)}},
     // {"trace": async (message) => {return await trace(message)}},
+    {"waifu": async (message) => {return await waifu(message)}},
 ];
 const attributes = {
     "str": "strength",
@@ -505,6 +506,20 @@ async function trace(message) {
     } else {
         message.reply("Tem que mandar uma imagem junto com a mensagem");
     }
+}
+
+async function waifu(message) {
+    const chat = await message.getChat();
+    const contact = await message.getContact();
+
+    console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+
+    var response = await axios.get(`https://pokeapi.co/api/v2/pokemon?limit=2000`);
+    var waifu = response.data.images[0].url;
+
+    const media = await MessageMedia.fromUrl(waifu);
+
+    await chat.sendMessage(media, {sendMediaAsSticker: true, stickerAuthor: "Sticker", stickerName: "Sticker", stickerCategories: []});
 }
 
 async function ficha(message) {
