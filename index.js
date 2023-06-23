@@ -29,7 +29,7 @@ const commands = [
     {"repeteco": async (message) => {return await repeteco(message)}},
     {"snap": async (message) => {return await marvelSnapCardData(message)}},
     {"ficha": async (message) => {return await ficha(message)}},
-    {"trace": async (message) => {return await trace(message)}},
+    // {"trace": async (message) => {return await trace(message)}},
 ];
 const attributes = {
     "str": "strength",
