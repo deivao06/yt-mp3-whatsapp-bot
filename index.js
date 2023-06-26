@@ -514,7 +514,7 @@ async function waifu(message) {
 
     console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
 
-    var response = await axios.get(`https://pokeapi.co/api/v2/pokemon?limit=2000`);
+    var response = await axios.get(`https://api.waifu.im/search`);
     var waifu = response.data.images[0].url;
 
     const media = await MessageMedia.fromUrl(waifu);
