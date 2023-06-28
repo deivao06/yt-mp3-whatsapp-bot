@@ -30,7 +30,7 @@ const commands = [
     {"snap": async (message) => {return await marvelSnapCardData(message)}},
     {"ficha": async (message) => {return await ficha(message)}},
     // {"trace": async (message) => {return await trace(message)}},
-    {"waifu": async (message) => {return await waifu(message)}},
+    {"waifu": async (message) => {return await waifu(message, ['559181770303'])}},
     {"quote": async (message) => {return await quote(message)}}
 ];
 const attributes = {
@@ -511,11 +511,15 @@ async function trace(message) {
     }
 }
 
-async function waifu(message) {
+async function waifu(message, blockedContacts = []) {
     const chat = await message.getChat();
     const contact = await message.getContact();
 
     console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+
+    if(blockedContacts.includes(contact.id.user)) {
+        await message.reply('Você está proíbido de usar este comando');
+    }
 
     var response = await axios.get(`https://api.waifu.im/search`);
     var waifu = response.data.images[0].url;
