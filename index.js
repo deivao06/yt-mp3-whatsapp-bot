@@ -14,7 +14,7 @@ const usersRepository = new UsersRepository();
 const repetecosRepository = new RepetecosRepository();
 const fichasRepository = new FichasRepository();
 
-const prefix = "!";
+const prefixes = ["!", "-"];
 const commands = [
     {"p": async (message) => {return await downloadAndSendYoutubeMp3(message)}},
     {"everyone": async (message) => {return await mentionEveryone(message)}},
@@ -31,6 +31,7 @@ const commands = [
     {"ficha": async (message) => {return await ficha(message)}},
     // {"trace": async (message) => {return await trace(message)}},
     {"waifu": async (message) => {return await waifu(message)}},
+    {"quote": async (message) => {return await quote(message)}}
 ];
 const attributes = {
     "str": "strength",
@@ -61,7 +62,9 @@ client.initialize();
 
 
 async function handleMessage(message) {
-    if(message.body.startsWith(prefix)){
+    var prefix = message.body.startsWith(prefixes[0]) ? prefixes[0] : (message.body.startsWith(prefixes[1]) ? prefixes[1] : null);
+
+    if(prefix){
         var messageCommand = message.body.split(" ")[0].split(prefix)[1];
         commands.forEach(async (command) => {
             var commandFunction = command[messageCommand];
@@ -520,6 +523,55 @@ async function waifu(message) {
     const media = await MessageMedia.fromUrl(waifu);
 
     await chat.sendMessage(media, {sendMediaAsSticker: true, stickerAuthor: "Sticker", stickerName: "Sticker", stickerCategories: []});
+}
+
+async function quote(message) {
+    const chat = await message.getChat();
+    const contact = await message.getContact();
+
+    var response = null;
+    var url = null;
+
+    console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+
+    var commandSplit = message.body.split(" ");
+    commandSplit.shift();
+    var type = commandSplit.pop();
+
+    var animeName = commandSplit.join(" ");
+
+    if(type == '--anime') {
+        url = `https://animechan.xyz/api/random/anime?title=${animeName}`;
+    } else if (type == '--personagem') {
+        url = `https://animechan.xyz/api/random/character?name=${animeName}`;
+    } else {
+        if(animeName) {
+            await message.reply(`Precisa especificar se é personagem ou anime. Ex: !quote ${animeName} --anime`);
+            return;
+        } else {
+            url = `https://animechan.xyz/api/random`;
+        }
+    }
+
+    response = await axios.get(`https://animechan.xyz/api/random/anime?title=${animeName}`).catch(async function (error) {
+        return error.response;
+    });
+
+    if(response.status == 200) {
+        var quote = response.data;
+        var synopsis = await translate(quote.quote, { from: 'en', to: 'pt' });
+        
+        await message.reply(`*Anime:* ${quote.anime}\n*Personagem:* ${quote.character}\n*Citação:* ${synopsis}`);
+    } else {
+        if(response.data.error) {
+            var error = response.data.error;
+        } else {
+            var error = response.data;
+        }
+
+        var errorMessage = await translate(error, { from: 'en', to: 'pt' });
+        await message.reply(errorMessage + ', a api dos caras tem limitação de 100 requests por hora (burros)');
+    }
 }
 
 async function ficha(message) {
