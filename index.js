@@ -517,11 +517,19 @@ async function waifu(message, blockedContacts = []) {
 
     console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
 
+    var commandSplit = message.body.split(" ");
+    commandSplit.shift();
+    var nsfw = commandSplit.join(" ");
+    var url = "https://api.waifu.im/search";
+
     if(blockedContacts.includes(contact.id.user)) {
         await message.reply('Você está proíbido de usar este comando');
+        return;
     }
 
-    var response = await axios.get(`https://api.waifu.im/search`);
+    if(nsfw == 'nsfw') url = "https://api.waifu.im/search/?is_nsfw=true";
+
+    var response = await axios.get(url);
     var waifu = response.data.images[0].url;
 
     const media = await MessageMedia.fromUrl(waifu);
@@ -557,7 +565,7 @@ async function quote(message) {
         }
     }
 
-    response = await axios.get(`https://animechan.xyz/api/random/anime?title=${animeName}`).catch(async function (error) {
+    response = await axios.get(url).catch(async function (error) {
         return error.response;
     });
 
@@ -574,7 +582,7 @@ async function quote(message) {
         }
 
         var errorMessage = await translate(error, { from: 'en', to: 'pt' });
-        await message.reply(errorMessage + ', a api dos caras tem limitação de 100 requests por hora (burros)');
+        await message.reply(errorMessage);
     }
 }
 
