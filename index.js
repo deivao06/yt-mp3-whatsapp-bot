@@ -571,9 +571,9 @@ async function quote(message) {
 
     if(response.status == 200) {
         var quote = response.data;
-        var synopsis = await translate(quote.quote, { from: 'en', to: 'pt' });
+        var synopsisPt = await translate(quote.quote, { from: 'en', to: 'pt' });
         
-        await message.reply(`*Anime:* ${quote.anime}\n*Personagem:* ${quote.character}\n*Citação:* ${synopsis}`);
+        await message.reply(`*Anime:* ${quote.anime}\n*Personagem:* ${quote.character}\n*Citação:* ${quote.quote}\n*CitaçãoPTBR:* ${synopsisPt}`);
     } else {
         if(response.data.error) {
             var error = response.data.error;
