@@ -73,10 +73,6 @@ async function handleMessage(message) {
                 const contact = await message.getContact();
 
                 await commandFunction(message);
-                // if(contact.id.user == '559181770303') {
-                //     await message.reply('Você está proibido de mandar comandos no bot');
-                // } else {
-                // }
             }
         })
     }
