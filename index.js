@@ -308,6 +308,10 @@ async function imageToGif(message) {
     const contact = await message.getContact();
 
     console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+
+    if(message.hasQuotedMsg) {
+        message = await message.getQuotedMessage();
+    }
     
     if(message.hasMedia) {
         const media = await message.downloadMedia();
