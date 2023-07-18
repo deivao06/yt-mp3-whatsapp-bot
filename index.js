@@ -226,7 +226,7 @@ async function animeData(message, type) {
     commandSplit.shift();
     var animeName = commandSplit.join(" ");
 
-    var response = await axios.get(`https://api.jikan.moe/v4/anime?q=${animeName}&type=${type}`);
+    var response = await axios.get(`https://api.jikan.moe/v4/anime?q=${animeName}&nsfw&type=${type}`);
 
     if(response.data.data.length > 0) {
         var anime = response.data.data[0];
