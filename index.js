@@ -16,7 +16,7 @@ const fichasRepository = new FichasRepository();
 
 const prefixes = ["!", "-"];
 const commands = [
-    {"p": async (message) => {return await downloadAndSendYoutubeMp3(message)}},
+    {"p": async (message) => {return await downloadAndSendYoutubeMp3(message, ['559181770303', '559182828479'])}},
     {"everyone": async (message) => {return await mentionEveryone(message)}},
     {"roll": async (message) => {return await rollDice(message)}},
     {"timetoduel": async (message) => {return await randomYugiohCard(message)}},
@@ -43,7 +43,8 @@ const attributes = {
 }
 
 const client = new Client({
-    authStrategy: new LocalAuth()
+    authStrategy: new LocalAuth(),
+    ffmpegPath: '../ffmpeg/ffmpeg-master-latest-win64-gpl/bin/ffmpeg.exe'
 });
 
 client.on('qr', qr => {
@@ -78,11 +79,16 @@ async function handleMessage(message) {
     }
 }
 
-async function downloadAndSendYoutubeMp3(message) {
+async function downloadAndSendYoutubeMp3(message, blockedContacts = []) {
     const chat = await message.getChat();
     const contact = await message.getContact();
 
     console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+
+    if(blockedContacts.includes(contact.id.user)) {
+        await message.reply('Você está proíbido de usar este comando');
+        return;
+    }
 
     var commandSplit = message.body.split(" ");
     commandSplit.shift();
