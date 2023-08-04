@@ -30,7 +30,7 @@ const commands = [
     {"snap": async (message) => {return await marvelSnapCardData(message)}},
     {"ficha": async (message) => {return await ficha(message)}},
     // {"trace": async (message) => {return await trace(message)}},
-    {"waifu": async (message) => {return await waifu(message, ['559181770303'])}},
+    {"waifu": async (message) => {return await waifu(message, ['559181770303', '559182828479'])}},
     {"quote": async (message) => {return await quote(message)}}
 ];
 const attributes = {

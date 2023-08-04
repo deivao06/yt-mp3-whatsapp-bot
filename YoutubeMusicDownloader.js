@@ -1,5 +1,5 @@
 const { Downloader, YtdlMp3Error } = require('ytdl-mp3');
-const ytsr = require('ytsr');
+const usetube = require('usetube');
 
 class YoutubeMusicDownloader {
     async download(videoName) {
@@ -55,46 +55,19 @@ class YoutubeMusicDownloader {
     }
   
     async searchYoutubeVideo(videoName) {
-        try {
-            const filters1 = await ytsr.getFilters(videoName);
-            const filter1 = filters1.get('Type').get('Video');
+        const searchResults = await usetube.searchVideo(videoName);
 
-            const searchResults = await ytsr(filter1.url, { limit: 10, pages: 1 });
-
-            var videoData = null;
-
-            searchResults.items.every((result, index) => {
-                if(result.type == 'shelf') {
-                    if(result.items.length > 0) {
-                        videoData = {
-                            error: false,
-                            name: result.items[0].title,
-                            url: result.items[0].url
-                        }
-
-                        return false;
-                    }
-                } else if (result.type == 'video') {
-                    videoData = {
-                        error: false,
-                        name: result.title,
-                        url: result.url
-                    }
-
-                    return false;
-                }
-
-                return true;
-            });
-            
-            return videoData;
-        } catch (e) {
-            if(e instanceof TypeError) {
-                return {
-                    error: true,
-                    message: "Não deu certo, tenta denovo"
-                }
+        if(searchResults.videos.length > 0) {
+            return {
+                error: false,
+                name: searchResults.videos[0].original_title,
+                url: `https://www.youtube.com/watch?v=${searchResults.videos[0].id}`
             }
+        }
+
+        return {
+            error: true,
+            message: "Nenhum video encontrado"
         }
     }
 }
