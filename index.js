@@ -61,21 +61,31 @@ client.on('message_create', async (message) => {
  
 client.initialize();
 
-
 async function handleMessage(message) {
     var prefix = message.body.startsWith(prefixes[0]) ? prefixes[0] : (message.body.startsWith(prefixes[1]) ? prefixes[1] : null);
 
+    // ban(message, ['5511949791746', '559181770303', '559182828479']);
+
     if(prefix){
         var messageCommand = message.body.split(" ")[0].split(prefix)[1];
+
         commands.forEach(async (command) => {
             var commandFunction = command[messageCommand];
 
             if(commandFunction) {
                 const contact = await message.getContact();
-
                 await commandFunction(message);
             }
         })
+    }
+}
+
+async function ban(message, blockedContacts = []){
+    const contact = await message.getContact();
+
+    if(blockedContacts.includes(contact.id.user)) {
+        await message.delete(true);
+        return;
     }
 }
 
