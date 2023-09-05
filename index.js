@@ -115,7 +115,7 @@ async function notequest(message) {
             text += `*-Nome:* ${spell.name}\n`;
             text += `*-Efeito:* ${spell.effect}\n`;
             text += `*-Quantidade:* ${spell.qtd}\n`;
-            text += `*---------------------------------* ${spell.qtd}\n`;
+            text += `*---------------------------------*\n`;
         }
     } else {
         text += "-Nenhuma\n";
