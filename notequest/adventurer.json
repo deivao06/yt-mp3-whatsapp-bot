@@ -1,0 +1,184 @@
+{
+    "races": {
+        "dice": "2d6",
+        "data": {
+            "2": {
+                "race": "Homem-Gosma", 
+                "pv": 10, 
+                "advantage": "Se engolfar o corpo de um inimigo morto recupera todos PV.",
+                "spells_quantity": 0
+            }, 
+            "3": {
+                "race": "Vagalóide", 
+                "pv": 16, 
+                "advantage": "Começa o jogo com 3 usos da Magia Básica: Luz.",
+                "spells_quantity": 3
+            }, 
+            "4": {
+                "race": "Fada", 
+                "pv": 8, 
+                "advantage": "Começa o jogo com 5 Magias Básicas aleatórias.",
+                "spells_quantity": 5
+            },
+            "5": {
+                "race": "Gnomo", 
+                "pv": 14, 
+                "advantage": "Começa o jogo com 3 Magias Básicas aleatórias.",
+                "spells_quantity": 3
+            },
+            "6": {
+                "race": "Elfo", 
+                "pv": 16, 
+                "advantage": "Começa o jogo com 1 Magia Básica aleatória.",
+                "spells_quantity": 1
+            },
+            "7": {
+                "race": "Humano", 
+                "pv": 20, 
+                "advantage": "Nenhuma.",
+                "spells_quantity": 0
+            }, 
+            "8": {
+                "race": "Anão", 
+                "pv": 18, 
+                "advantage": "Quando for rolar para Achar Passagens Secretas, role dois dados e descarte o menor.",
+                "spells_quantity": 0
+            }, 
+            "9": {
+                "race": "Pequenino", 
+                "pv": 14, 
+                "advantage": "Quando Mover em Silêncio, para cada monstro role dois dados e descarte o menor.",
+                "spells_quantity": 0
+            }, 
+            "10": {
+                "race": "Povo-Gato", 
+                "pv": 19, 
+                "advantage": "Pode vender equipamento na cidade pelo dobro do valor.",
+                "spells_quantity": 0
+            },
+            "11": {
+                "race": "Rinoceróide", 
+                "pv": 24, 
+                "advantage": "Pode atacar com seu chifre (Dano 1d6) em vez de atacar com uma arma.",
+                "spells_quantity": 0
+            }, 
+            "12": {
+                "race": "Meio-Dragão", 
+                "pv": 30, 
+                "advantage": "Começa o jogo com 3 usos da Magia Básica: Bola de Fogo.",
+                "spells_quantity": 3
+            }
+        }
+    },
+    "classes": {
+        "dice": "2d6",
+        "data": {
+            "2": {
+                "class": "Mendigo",
+                "pv": 4,
+                "advantage": "Nenhuma.",
+                "weapon": "Pedaço de Pau (Dano 1d6-2)",
+                "spells_quantity": 0
+            },
+            "3": {
+                "class": "Coveiro",
+                "pv": 2,
+                "advantage": "Causa +2 de dano em Mortos-Vivos.",
+                "weapon": "Pá (Dano 1d6-1)",
+                "spells_quantity": 0
+            },
+            "4": {
+                "class": "Nobre",
+                "pv": 0,
+                "advantage": "Começa o jogo com 1 Magia Básica aleatória.",
+                "weapon": "Rapieira (Dano 1d6+1)",
+                "spells_quantity": 1
+            },
+            "5": {
+                "class": "Estudante",
+                "pv": 0,
+                "advantage": "Começa o jogo com 3 Magias Básicas aleatórias.",
+                "weapon": "Adaga (Dano 1d6-1)",
+                "spells_quantity": 3
+            },
+            "6": {
+                "class": "Ferreiro",
+                "pv": 4,
+                "advantage": "Pode recuperar armaduras gastando 1 Tocha.",
+                "weapon": "Martelo (Dano 1d6)",
+                "spells_quantity": 0
+            },
+            "7": {
+                "class": "Guarda",
+                "pv": 4,
+                "advantage": "Nenhuma.",
+                "weapon": "Espada curta (Dano 1d6)",
+                "spells_quantity": 0
+            },
+            "8": {
+                "class": "Cozinheiro",
+                "pv": 2,
+                "advantage": "Ganha 1 provisão por monstro (que não seja morto-vivo).",
+                "weapon": "Cutelo (Dano 1d6)",
+                "spells_quantity": 0
+            },
+            "9": {
+                "class": "Chaveiro",
+                "pv": 2,
+                "advantage": "Não gasta tochas quando Abrir Fechaduras.",
+                "weapon": "Adaga (Dano 1d6-1)",
+                "spells_quantity": 0
+            },
+            "10": {
+                "class": "Lenhador",
+                "pv": 4,
+                "advantage": "Quando destruir portas, role o dado. Se cair 6 ganha 1 tocha.",
+                "weapon": "Machado (Dano 1d6)",
+                "spells_quantity": 0
+            },
+            "11": {
+                "class": "Minerador",
+                "pv": 4,
+                "advantage": "Se acabar as tochas pode sair caso tenha caminho livre.",
+                "weapon": "Picareta (Dano 1d6-1)",
+                "spells_quantity": 0
+            },
+            "12": {
+                "class": "Gladiador",
+                "pv": 6,
+                "advantage": "Nenhuma.",
+                "weapon": "Espada curta (Dano 1d6)",
+                "spells_quantity": 0
+            }
+        }
+    },
+    "basic_spells": {
+        "dice": "1d6",
+        "data": {
+            "1": {
+                "basic_spell": "Cura",
+                "effect": "Recupera 5 PV."
+            },
+            "2": {
+                "basic_spell": "Luz",
+                "effect": "Cria um globo de luz que vale como uma Tocha."
+            },
+            "3": {
+                "basic_spell": "Teletransporte",
+                "effect": "Se teletransporta para qualquer sala que já visitou. Pode ser usado para fugir de combate."
+            },
+            "4": {
+                "basic_spell": "Raio de Gelo",
+                "effect": "Ataque que causa 4 de dano e o oponente não atacará no próximo turno."
+            },
+            "5": {
+                "basic_spell": "Relâmpago",
+                "effect": "Ataque que causa 6 de dano."
+            },
+            "6": {
+                "basic_spell": "Bola de Fogo",
+                "effect": "Ataque que causa 5 de dano em todos oponentes da sala onde estiver."
+            }
+        }
+    }
+}

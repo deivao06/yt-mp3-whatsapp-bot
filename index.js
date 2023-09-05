@@ -8,6 +8,7 @@ const { YoutubeMusicDownloader } = require('./YoutubeMusicDownloader.js');
 const { UsersRepository } = require('./repositories/UsersRepository.js');
 const { RepetecosRepository } = require('./repositories/RepetecosRepository.js');
 const { FichasRepository } = require('./repositories/FichasRepository.js');
+const { adventurer } = require('./notequest/adventurer_generator.js');
 
 const yt = new YoutubeMusicDownloader();
 const usersRepository = new UsersRepository();
@@ -31,7 +32,8 @@ const commands = [
     {"ficha": async (message) => {return await ficha(message)}},
     // {"trace": async (message) => {return await trace(message)}},
     {"waifu": async (message) => {return await waifu(message, ['559181770303', '559182828479'])}},
-    {"quote": async (message) => {return await quote(message)}}
+    {"quote": async (message) => {return await quote(message)}},
+    {"notequest": async(message) => {return await notequest(message)}}
 ];
 const attributes = {
     "str": "strength",
@@ -78,6 +80,48 @@ async function handleMessage(message) {
             }
         })
     }
+}
+
+async function notequest(message) {
+    const chat = await message.getChat();
+    const contact = await message.getContact();
+
+    console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+
+    var commandSplit = message.body.split(" ");
+    commandSplit.shift();
+    var name = commandSplit.join(" ");
+
+    var adventurerData = await adventurer(name);
+    var text = "";
+
+    text += `*Nome:* ${adventurerData.name}\n`;
+    text += `*PV:* ${adventurerData.pv}\n\n`;
+
+    text += `*RAÇA*\n`;
+    text += `*-Nome:* ${adventurerData.race.name}\n`;
+    text += `*-Vantagem:* ${adventurerData.race.advantage}\n\n`;
+
+    text += `*CLASSE*\n`;
+    text += `*-Nome:* ${adventurerData.class.name}\n`;
+    text += `*-Vantagem:* ${adventurerData.class.advantage}\n`;
+    text += `*-Arma:* ${adventurerData.class.weapon}\n\n`;
+
+    text += `*MAGIAS*\n`;
+    if(Object.keys(adventurerData.basic_spells).length > 0) {
+        for(const key in adventurerData.basic_spells) {
+            var spell = adventurerData.basic_spells[key];
+
+            text += `*-Nome:* ${spell.name}\n`;
+            text += `*-Efeito:* ${spell.effect}\n`;
+            text += `*-Quantidade:* ${spell.qtd}\n`;
+            text += `*---------------------------------* ${spell.qtd}\n`;
+        }
+    } else {
+        text += "-Nenhuma\n";
+    }
+
+    await message.reply(text);
 }
 
 async function ban(message, blockedContacts = []){
