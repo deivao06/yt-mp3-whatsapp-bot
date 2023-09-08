@@ -9,7 +9,7 @@ class YoutubeMusicDownloader {
         });
 
         const videoData = await this.searchYoutubeVideo(videoName);
-
+        
         if(!videoData.error) {
             try {
                 const path = await downloader.downloadSong(videoData.url);
@@ -22,7 +22,7 @@ class YoutubeMusicDownloader {
                 if(e instanceof YtdlMp3Error) {
                     return {
                         error: true,
-                        message: "Não consegui baixar não, pode ser que tenha restrição de idade"
+                        message: e
                     }
                 }
             }
@@ -48,7 +48,7 @@ class YoutubeMusicDownloader {
             if(e instanceof YtdlMp3Error) {
                 return {
                     error: true,
-                    message: "Não consegui baixar não, pode ser que tenha restrição de idade"
+                    message: e
                 }
             }
         }
