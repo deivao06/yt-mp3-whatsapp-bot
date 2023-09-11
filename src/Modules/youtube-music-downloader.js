@@ -3,29 +3,10 @@ const usetube = require('usetube');
 
 class YoutubeMusicDownloader {
     async download(videoName) {
-        const downloader = new Downloader({
-            outputDir: './files',
-            getTags: false,
-        });
-
         const videoData = await this.searchYoutubeVideo(videoName);
         
         if(!videoData.error) {
-            try {
-                const path = await downloader.downloadSong(videoData.url);
-        
-                return {
-                    error: false,
-                    path: path
-                }
-            } catch (e) {
-                if(e instanceof YtdlMp3Error) {
-                    return {
-                        error: true,
-                        message: e
-                    }
-                }
-            }
+            await this.downloadFromUrl(videoData.url);
         } else {
             return videoData;
         }
@@ -72,4 +53,4 @@ class YoutubeMusicDownloader {
     }
 }
 
-module.exports = { YoutubeMusicDownloader };
+module.exports = YoutubeMusicDownloader;

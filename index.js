@@ -16,6 +16,7 @@ const repetecosRepository = new RepetecosRepository();
 const fichasRepository = new FichasRepository();
 
 const prefixes = ["!", "-"];
+
 const commands = [
     {"p": async (message) => {return await downloadAndSendYoutubeMp3(message, ['559181770303', '559182828479'])}},
     {"everyone": async (message) => {return await mentionEveryone(message)}},
@@ -29,12 +30,13 @@ const commands = [
     // {"register": async (message) => {return await registerUsers(message)}},
     {"repeteco": async (message) => {return await repeteco(message)}},
     {"snap": async (message) => {return await marvelSnapCardData(message)}},
-    {"ficha": async (message) => {return await ficha(message)}},
+    // {"ficha": async (message) => {return await ficha(message)}},
     // {"trace": async (message) => {return await trace(message)}},
     {"waifu": async (message) => {return await waifu(message, ['559181770303', '559182828479'])}},
     {"quote": async (message) => {return await quote(message)}},
     {"notequest": async(message) => {return await notequest(message)}}
 ];
+
 const attributes = {
     "str": "strength",
     "dex": "dexterity",
