@@ -135,12 +135,7 @@ class WhatsappWebClient {
         commandSplit.shift();
         var nsfw = commandSplit.join(" ");
         var url = "https://api.waifu.im/search";
-    
-        if(blockedContacts.includes(contact.id.user)) {
-            await message.reply('Você está proíbido de usar este comando');
-            return;
-        }
-    
+        
         if(nsfw == 'nsfw') url = "https://api.waifu.im/search/?is_nsfw=true";
     
         var response = await axios.get(url);
