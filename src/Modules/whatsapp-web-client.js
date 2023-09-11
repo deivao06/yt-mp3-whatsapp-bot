@@ -2,8 +2,8 @@ const fs = require('fs')
 const qrcode = require('qrcode-terminal');
 const { Client , LocalAuth, MessageMedia } = require('whatsapp-web.js');
 
-const YoutubeMusicDownloader = require('./src/Modules/youtube-music-downloader.js');
-const DiceRoller = require('./src/Modules/dice-roller.js');
+const YoutubeMusicDownloader = require('./youtube-music-downloader.js');
+const DiceRoller = require('./dice-roller.js');
 
 class WhatsappWebClient {
     constructor() {

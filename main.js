@@ -1,6 +1,6 @@
 const express = require('express');
 const router = require('./routes.js');
-const WhatsappWebClient = require('./whatsapp-web-client.js');
+const WhatsappWebClient = require('./src/Modules/whatsapp-web-client.js');
 
 const expressApp = express();
 expressApp.use('/api', router);
