@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 
 const YoutubeMusicDownloader = require('./src/Modules/youtube-music-downloader.js');
+const DiceRoller = require('./src/Modules/dice-roller.js');
 
 router.get('/youtube-music-downloader', async (request, response) => {
     const videoNameOrUrl = request.query.message;
@@ -13,13 +14,22 @@ router.get('/youtube-music-downloader', async (request, response) => {
         videoData = await youtubeMusicDownloader.download(videoNameOrUrl);
     }
 
-    if(videoData && videoData.hasOwnProperty('error') && !videoData.error) {
-        response.send(videoData.path);
+    if(videoData.hasOwnProperty('error') && !videoData.error) {
+        response.status(200).json({ message: videoData.path });
         return;
     } else {
-        response.send(videoData.message);
+        response.status(401).json({ message: videoData.message });
         return;
     }
+});
+
+router.get('/dice-roller', async (request, response) => {
+    const dices = request.query.message;
+    const diceRoller = new DiceRoller();
+
+    var result = await diceRoller.roll(dices);
+
+    response.status(200).json({ message: result });
 });
 
 module.exports = router;

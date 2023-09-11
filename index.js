@@ -18,9 +18,9 @@ const fichasRepository = new FichasRepository();
 const prefixes = ["!", "-"];
 
 const commands = [
-    {"p": async (message) => {return await downloadAndSendYoutubeMp3(message, ['559181770303', '559182828479'])}},
-    {"everyone": async (message) => {return await mentionEveryone(message)}},
-    {"roll": async (message) => {return await rollDice(message)}},
+    // {"p": async (message) => {return await downloadAndSendYoutubeMp3(message, ['559181770303', '559182828479'])}},
+    // {"everyone": async (message) => {return await mentionEveryone(message)}},
+    // {"roll": async (message) => {return await rollDice(message)}},
     {"timetoduel": async (message) => {return await randomYugiohCard(message)}},
     {"anime": async (message) => {return await animeData(message, "tv")}},
     {"animem": async (message) => {return await animeData(message, "movie")}},
