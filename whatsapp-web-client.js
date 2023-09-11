@@ -12,6 +12,9 @@ class WhatsappWebClient {
             // {"p": async (message) => { return await this.youtubeMusicDownloader(message) }},
             {"everyone": async (message) => { return await this.mentionEveryone(message)} },
             {"roll": async (message) => {return await this.rollDice(message)}},
+            {"sticker": async (message) => {return this.imageToGif(message)}},
+            {"waifu": async (message) => {return await waifu(message)}},
+            //TODO CRIAR CLASSE PARA WAIFU E CRIAR ROTA PARA ACESSAR VIA API DE TESTES
         ];
 
         this.wwebClient = new Client({ authStrategy: new LocalAuth(), ffmpegPath: '../ffmpeg/ffmpeg-master-latest-win64-gpl/bin/ffmpeg.exe' });
@@ -31,7 +34,6 @@ class WhatsappWebClient {
                 var commandFunction = command[messageCommand];
     
                 if(commandFunction) {
-                    const contact = await message.getContact();
                     await commandFunction(message);
                 }
             })
@@ -101,8 +103,52 @@ class WhatsappWebClient {
     
         var dices = commandSplit[0];
         var result = await diceRoller.roll(dices);
-        
+
         await message.reply(result);
+    }
+
+    async imageToGif(message) {
+        const chat = await message.getChat();
+        const contact = await message.getContact();
+    
+        console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+    
+        if(message.hasQuotedMsg) {
+            message = await message.getQuotedMessage();
+        }
+        
+        if(message.hasMedia) {
+            const media = await message.downloadMedia();
+            await chat.sendMessage(media, {sendMediaAsSticker: true, stickerAuthor: "Sticker", stickerName: "Sticker", stickerCategories: []});
+        } else {
+            message.reply("Tem que mandar uma imagem junto com a mensagem");
+        }
+    }
+
+    async waifu(message) {
+        const chat = await message.getChat();
+        const contact = await message.getContact();
+    
+        console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+    
+        var commandSplit = message.body.split(" ");
+        commandSplit.shift();
+        var nsfw = commandSplit.join(" ");
+        var url = "https://api.waifu.im/search";
+    
+        if(blockedContacts.includes(contact.id.user)) {
+            await message.reply('Você está proíbido de usar este comando');
+            return;
+        }
+    
+        if(nsfw == 'nsfw') url = "https://api.waifu.im/search/?is_nsfw=true";
+    
+        var response = await axios.get(url);
+        var waifu = response.data.images[0].url;
+    
+        const media = await MessageMedia.fromUrl(waifu);
+    
+        await chat.sendMessage(media, {sendMediaAsSticker: true, stickerAuthor: "Sticker", stickerName: "Sticker", stickerCategories: []});
     }
 }
 
