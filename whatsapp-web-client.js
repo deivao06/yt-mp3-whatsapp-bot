@@ -8,7 +8,7 @@ class WhatsappWebClient {
     constructor() {
         this.prefixes = ["!", "-"];
         this.commands = [
-            {"p": async (message) => {}},
+            {"p": async (message) => { return await this.youtubeMusicDownloader(message) }},
         ];
 
         this.wwebClient = new Client({ authStrategy: new LocalAuth(), ffmpegPath: '../ffmpeg/ffmpeg-master-latest-win64-gpl/bin/ffmpeg.exe' });
@@ -41,10 +41,9 @@ class WhatsappWebClient {
 
         console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
 
-        var commandSplit = message.body.split(" ");
-        commandSplit.shift();
+        var commandSplit = message.body.split(" ").shift();
         var videoNameOrUrl = commandSplit.join(" ");
-
+        
         const youtubeMusicDownloader = new YoutubeMusicDownloader();
 
         if(videoNameOrUrl.startsWith("https")){

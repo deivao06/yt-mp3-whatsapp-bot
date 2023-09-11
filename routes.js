@@ -4,8 +4,7 @@ const router = express.Router();
 const YoutubeMusicDownloader = require('./src/Modules/youtube-music-downloader.js');
 
 router.get('/youtube-music-downloader', async (request, response) => {
-    var videoNameOrUrl = request.params.message;
-    
+    const videoNameOrUrl = request.query.message;
     const youtubeMusicDownloader = new YoutubeMusicDownloader();
 
     if(videoNameOrUrl.startsWith("https")){
@@ -14,18 +13,12 @@ router.get('/youtube-music-downloader', async (request, response) => {
         videoData = await youtubeMusicDownloader.download(videoNameOrUrl);
     }
 
-    if(!videoData.error) {
-        const media = MessageMedia.fromFilePath(videoData.path);
-    
-        await message.reply(media);
-    
-        try {
-            fs.unlinkSync(videoData.path)
-        } catch(err) {
-            console.error(err)
-        }
+    if(videoData && videoData.hasOwnProperty('error') && !videoData.error) {
+        response.send(videoData.path);
+        return;
     } else {
-        await chat.sendMessage(`@${contact.id.user} ${videoData.message}`, {mentions: [contact]});
+        response.send(videoData.message);
+        return;
     }
 });
 

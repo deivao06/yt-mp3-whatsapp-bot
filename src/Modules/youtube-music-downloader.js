@@ -6,7 +6,7 @@ class YoutubeMusicDownloader {
         const videoData = await this.searchYoutubeVideo(videoName);
         
         if(!videoData.error) {
-            await this.downloadFromUrl(videoData.url);
+            return await this.downloadFromUrl(videoData.url);
         } else {
             return videoData;
         }
@@ -14,7 +14,7 @@ class YoutubeMusicDownloader {
 
     async downloadFromUrl(videoUrl) {
         const downloader = new Downloader({
-            outputDir: './files',
+            outputDir: '../Files',
             getTags: false,
         });
 
