@@ -13,7 +13,7 @@ class WhatsappWebClient {
             {"everyone": async (message) => { return await this.mentionEveryone(message)} },
             {"roll": async (message) => {return await this.rollDice(message)}},
             {"sticker": async (message) => {return this.imageToGif(message)}},
-            {"waifu": async (message) => {return await waifu(message)}},
+            {"waifu": async (message) => {return this.waifu(message)}},
             //TODO CRIAR CLASSE PARA WAIFU E CRIAR ROTA PARA ACESSAR VIA API DE TESTES
         ];
 
