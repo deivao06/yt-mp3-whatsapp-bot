@@ -7,22 +7,14 @@ const Waifu = require('./src/Modules/waifu.js');
 
 router.get('/youtube-music-downloader', async (request, response) => {
     const videoNameOrUrl = request.query.message;
-    const youtubeMusicDownloader = new YoutubeMusicDownloader();
+    const youtubeMusicDownloader = new YoutubeMusicDownloader('./src/Files');
 
-    var videoData = null;
-
-    if(videoNameOrUrl.startsWith("https")){
-        videoData = await youtubeMusicDownloader.downloadFromUrl(videoNameOrUrl);
-    } else {
-        videoData = await youtubeMusicDownloader.download(videoNameOrUrl);
-    }
-
-    if(videoData.hasOwnProperty('error') && !videoData.error) {
-        response.status(200).json({ message: videoData.path });
-        return;
-    } else {
-        response.status(401).json({ message: videoData.message });
-        return;
+    try {
+        var songData = await youtubeMusicDownloader.downloadSong(videoNameOrUrl);
+        response.status(200).json(songData);
+    } catch (e) {
+        console.log(e);
+        response.status(500).json({ message: e });
     }
 });
 

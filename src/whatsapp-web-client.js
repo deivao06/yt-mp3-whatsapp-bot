@@ -2,19 +2,20 @@ const fs = require('fs');
 const qrcode = require('qrcode-terminal');
 const { Client , LocalAuth, MessageMedia } = require('whatsapp-web.js');
 
-const YoutubeMusicDownloader = require('./youtube-music-downloader.js');
-const DiceRoller = require('./dice-roller.js');
-const Waifu = require('./waifu.js');
+const YoutubeMusicDownloader = require('./Modules/youtube-music-downloader.js');
+const DiceRoller = require('./Modules/dice-roller.js');
+const Waifu = require('./Modules/waifu.js');
 
 class WhatsappWebClient {
     constructor() {
         this.prefixes = ["!", "-"];
         this.commands = [
-            // {"p": async (message) => { return await this.youtubeMusicDownloader(message) }},
+            {"p": async (message) => { return await this.youtubeMusicDownloader(message) }},
             {"everyone": async (message) => { return await this.mentionEveryone(message) }},
             {"roll": async (message) => { return await this.rollDice(message) }},
             {"sticker": async (message) => { return this.imageToGif(message) }},
             {"waifu": async (message) => { return this.waifu(message) }},
+            {"notequest": async (message) => { return this.notequest(message) }}
         ];
 
         this.wwebClient = new Client({ authStrategy: new LocalAuth(), ffmpegPath: '../ffmpeg/ffmpeg-master-latest-win64-gpl/bin/ffmpeg.exe' });
@@ -50,27 +51,20 @@ class WhatsappWebClient {
         commandSplit.shift();
         var videoNameOrUrl = commandSplit.join(" ");
 
-        const youtubeMusicDownloader = new YoutubeMusicDownloader();
+        const youtubeMusicDownloader = new YoutubeMusicDownloader(__dirname + '/../Files');
+        const songData = await youtubeMusicDownloader.downloadSong(videoNameOrUrl);
 
-        var videoData = null;
-
-        if(videoNameOrUrl.startsWith("https")){
-            videoData = await youtubeMusicDownloader.downloadFromUrl(videoNameOrUrl);
-        } else {
-            videoData = await youtubeMusicDownloader.download(videoNameOrUrl);
-        }
-
-        if(!videoData.error) {
-            try {
-                const media = MessageMedia.fromFilePath(videoData.path);
+        try {
+            if(!songData.error) {
+                const media = MessageMedia.fromFilePath(songData.path);
                 await message.reply(media);
-                fs.unlinkSync(videoData.path)
-            } catch(err) {
-                console.error(err);
-                fs.unlinkSync(videoData.path);
+                fs.unlinkSync(songData.path);
+            } else {
+                await chat.sendMessage(`@${contact.id.user} ${songData.message}`, {mentions: [contact]});
             }
-        } else {
-            await chat.sendMessage(`@${contact.id.user} ${videoData.message}`, {mentions: [contact]});
+        } catch (e) {
+            console.error(e);
+            fs.unlinkSync(songData.path);
         }
     }
 
