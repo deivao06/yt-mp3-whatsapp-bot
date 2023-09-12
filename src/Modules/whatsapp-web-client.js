@@ -2,7 +2,7 @@ const fs = require('fs');
 const qrcode = require('qrcode-terminal');
 const { Client , LocalAuth, MessageMedia } = require('whatsapp-web.js');
 
-const YoutubeMusicDownloader = require('./youtube-music-downloader.js');
+const YoutubeMusicDownloader = require('./youtube-music-downloader');
 const DiceRoller = require('./dice-roller.js');
 const Waifu = require('./waifu.js');
 
@@ -10,11 +10,11 @@ class WhatsappWebClient {
     constructor() {
         this.prefixes = ["!", "-"];
         this.commands = [
-            // {"p": async (message) => { return await this.youtubeMusicDownloader(message) }},
-            {"everyone": async (message) => { return await this.mentionEveryone(message)} },
-            {"roll": async (message) => {return await this.rollDice(message)}},
-            {"sticker": async (message) => {return this.imageToGif(message)}},
-            {"waifu": async (message) => {return this.waifu(message)}},
+            {"p": async (message) => { return await this.youtubeMusicDownloader(message) }},
+            {"everyone": async (message) => { return await this.mentionEveryone(message) }},
+            {"roll": async (message) => { return await this.rollDice(message) }},
+            {"sticker": async (message) => { return this.imageToGif(message) }},
+            {"waifu": async (message) => { return this.waifu(message) }},
         ];
 
         this.wwebClient = new Client({ authStrategy: new LocalAuth(), ffmpegPath: '../ffmpeg/ffmpeg-master-latest-win64-gpl/bin/ffmpeg.exe' });

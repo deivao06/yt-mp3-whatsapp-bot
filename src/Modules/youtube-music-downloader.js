@@ -14,7 +14,7 @@ class YoutubeMusicDownloader {
 
     async downloadFromUrl(videoUrl) {
         const downloader = new Downloader({
-            outputDir: '../Files',
+            outputDir: __dirname + '/../files',
             getTags: false,
         });
 
@@ -27,6 +27,7 @@ class YoutubeMusicDownloader {
             }
         } catch (e) {
             if(e instanceof YtdlMp3Error) {
+                console.log(e);
                 return {
                     error: true,
                     message: e
