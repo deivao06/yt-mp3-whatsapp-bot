@@ -10,7 +10,7 @@ class WhatsappWebClient {
     constructor() {
         this.prefixes = ["!", "-"];
         this.commands = [
-            {"p": async (message) => { return await this.youtubeMusicDownloader(message) }},
+            // {"p": async (message) => { return await this.youtubeMusicDownloader(message) }},
             {"everyone": async (message) => { return await this.mentionEveryone(message) }},
             {"roll": async (message) => { return await this.rollDice(message) }},
             {"sticker": async (message) => { return this.imageToGif(message) }},
@@ -46,10 +46,13 @@ class WhatsappWebClient {
 
         console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
 
-        var commandSplit = message.body.split(" ").shift();
+        var commandSplit = message.body.split(" ");
+        commandSplit.shift();
         var videoNameOrUrl = commandSplit.join(" ");
 
         const youtubeMusicDownloader = new YoutubeMusicDownloader();
+
+        var videoData = null;
 
         if(videoNameOrUrl.startsWith("https")){
             videoData = await youtubeMusicDownloader.downloadFromUrl(videoNameOrUrl);

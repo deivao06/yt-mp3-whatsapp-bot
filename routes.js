@@ -9,6 +9,8 @@ router.get('/youtube-music-downloader', async (request, response) => {
     const videoNameOrUrl = request.query.message;
     const youtubeMusicDownloader = new YoutubeMusicDownloader();
 
+    var videoData = null;
+
     if(videoNameOrUrl.startsWith("https")){
         videoData = await youtubeMusicDownloader.downloadFromUrl(videoNameOrUrl);
     } else {
