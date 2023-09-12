@@ -38,7 +38,7 @@ class Notequest {
         }
         adventurer.pv += race.pv;
     
-        return getAdventurerBasicSpells(adventurer, race.spells_quantity, true);
+        return this.getAdventurerBasicSpells(adventurer, race.spells_quantity, true);
     }
     
     getAdventurerClass(adventurer) {
@@ -88,7 +88,7 @@ class Notequest {
         var sum = 0;
     
         for(var i = 0; i < quantity; i++) {
-            var rollResult = randomNumber(faces);
+            var rollResult = this.randomNumber(faces);
             sum += rollResult;
     
             rolls.push(rollResult);

@@ -4,6 +4,7 @@ const router = express.Router();
 const YoutubeMusicDownloader = require('./src/Modules/youtube-music-downloader.js');
 const DiceRoller = require('./src/Modules/dice-roller.js');
 const Waifu = require('./src/Modules/waifu.js');
+const Notequest = require('./src/Modules/notequest.js');
 
 router.get('/youtube-music-downloader', async (request, response) => {
     const videoNameOrUrl = request.query.message;
@@ -32,6 +33,14 @@ router.get('/waifu', async (request, response) => {
 
     const waifu = new Waifu();
     response.status(200).json({ message: await waifu.getWaifu(nsfw)});
+})
+
+router.get('/notequest', async (request, response) => {
+    const name = request.query.message;
+    const notequest = new Notequest();
+    const adventurer = await notequest.adventurer(name);
+
+    response.status(200).json(adventurer);
 })
 
 module.exports = router;

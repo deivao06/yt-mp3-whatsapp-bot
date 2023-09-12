@@ -5,6 +5,7 @@ const { Client , LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const YoutubeMusicDownloader = require('./Modules/youtube-music-downloader.js');
 const DiceRoller = require('./Modules/dice-roller.js');
 const Waifu = require('./Modules/waifu.js');
+const Notequest = require('./Modules/notequest.js');
 
 class WhatsappWebClient {
     constructor() {
@@ -136,6 +137,50 @@ class WhatsappWebClient {
         const media = await MessageMedia.fromUrl(await waifu.getWaifu(nsfw));
     
         await chat.sendMessage(media, {sendMediaAsSticker: true, stickerAuthor: "Sticker", stickerName: "Sticker", stickerCategories: []});
+    }
+
+    async notequest(message) {
+        const chat = await message.getChat();
+        const contact = await message.getContact();
+
+        console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+
+        var commandSplit = message.body.split(" ");
+        commandSplit.shift();
+        var name = commandSplit.join(" ");
+
+        const notequest = new Notequest();
+        const adventurerData = await notequest.adventurer(name);
+        
+        var text = "";
+
+        text += `*Nome:* ${adventurerData.name}\n`;
+        text += `*PV:* ${adventurerData.pv}\n\n`;
+
+        text += `*RAÇA*\n`;
+        text += `*-Nome:* ${adventurerData.race.name}\n`;
+        text += `*-Vantagem:* ${adventurerData.race.advantage}\n\n`;
+
+        text += `*CLASSE*\n`;
+        text += `*-Nome:* ${adventurerData.class.name}\n`;
+        text += `*-Vantagem:* ${adventurerData.class.advantage}\n`;
+        text += `*-Arma:* ${adventurerData.class.weapon}\n\n`;
+
+        text += `*MAGIAS*\n`;
+        if(Object.keys(adventurerData.basic_spells).length > 0) {
+            for(const key in adventurerData.basic_spells) {
+                var spell = adventurerData.basic_spells[key];
+
+                text += `*-Nome:* ${spell.name}\n`;
+                text += `*-Efeito:* ${spell.effect}\n`;
+                text += `*-Quantidade:* ${spell.qtd}\n`;
+                text += `*---------------------------------*\n`;
+            }
+        } else {
+            text += "-Nenhuma\n";
+        }
+
+        await message.reply(text);
     }
 }
 
