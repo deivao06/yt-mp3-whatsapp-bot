@@ -136,7 +136,7 @@ class WhatsappWebClient {
         var nsfw = commandSplit.join(" ");
 
         const waifu = new Waifu();
-        const media = await MessageMedia.fromUrl(waifu.getWaifu(nsfw));
+        const media = await MessageMedia.fromUrl(await waifu.getWaifu(nsfw));
     
         await chat.sendMessage(media, {sendMediaAsSticker: true, stickerAuthor: "Sticker", stickerName: "Sticker", stickerCategories: []});
     }
