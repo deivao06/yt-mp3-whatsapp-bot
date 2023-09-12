@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
-const YoutubeMusicDownloader = require('./src/modules/youtube-music-downloader.js');
-const DiceRoller = require('./src/modules/dice-roller.js');
-const Waifu = require('./src/modules/waifu.js');
+const YoutubeMusicDownloader = require('./src/Modules/youtube-music-downloader.js');
+const DiceRoller = require('./src/Modules/dice-roller.js');
+const Waifu = require('./src/Modules/waifu.js');
 
 router.get('/youtube-music-downloader', async (request, response) => {
     const videoNameOrUrl = request.query.message;
