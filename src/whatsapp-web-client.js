@@ -51,7 +51,7 @@ class WhatsappWebClient {
         commandSplit.shift();
         var videoNameOrUrl = commandSplit.join(" ");
 
-        const youtubeMusicDownloader = new YoutubeMusicDownloader(__dirname + '/../Files');
+        const youtubeMusicDownloader = new YoutubeMusicDownloader(__dirname + '/Files');
         const songData = await youtubeMusicDownloader.downloadSong(videoNameOrUrl);
 
         try {
