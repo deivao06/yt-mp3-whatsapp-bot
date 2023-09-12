@@ -58,14 +58,13 @@ class WhatsappWebClient {
         }
 
         if(!videoData.error) {
-            const media = MessageMedia.fromFilePath(videoData.path);
-        
-            await message.reply(media);
-        
             try {
+                const media = MessageMedia.fromFilePath(videoData.path);
+                await message.reply(media);
                 fs.unlinkSync(videoData.path)
             } catch(err) {
-                console.error(err)
+                console.error(err);
+                fs.unlinkSync(videoData.path);
             }
         } else {
             await chat.sendMessage(`@${contact.id.user} ${videoData.message}`, {mentions: [contact]});
