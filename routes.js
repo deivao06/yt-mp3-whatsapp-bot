@@ -13,8 +13,8 @@ router.get('/youtube-music-downloader', async (request, response) => {
         var songData = await youtubeMusicDownloader.downloadSong(videoNameOrUrl);
         response.status(200).json(songData);
     } catch (e) {
-        console.log(e);
-        response.status(500).json({ message: e });
+        console.log(e.message);
+        response.status(500).json({ message: e.message });
     }
 });
 

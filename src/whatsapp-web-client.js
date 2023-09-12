@@ -63,8 +63,9 @@ class WhatsappWebClient {
                 await chat.sendMessage(`@${contact.id.user} ${songData.message}`, {mentions: [contact]});
             }
         } catch (e) {
-            console.error(e);
+            console.error(e.message);
             fs.unlinkSync(songData.path);
+            await chat.sendMessage(`@${contact.id.user} ${e.message}`, {mentions: [contact]});
         }
     }
 
