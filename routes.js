@@ -1,10 +1,12 @@
 const express = require('express');
 const router = express.Router();
+const axios = require('axios');
 
 const YoutubeMusicDownloader = require('./src/Modules/youtube-music-downloader.js');
 const DiceRoller = require('./src/Modules/dice-roller.js');
 const Waifu = require('./src/Modules/waifu.js');
 const Notequest = require('./src/Modules/notequest.js');
+const SteamGames = require('./src/Modules/steam-games.js');
 
 router.get('/youtube-music-downloader', async (request, response) => {
     const videoNameOrUrl = request.query.message;
@@ -42,5 +44,12 @@ router.get('/notequest', async (request, response) => {
 
     response.status(200).json(adventurer);
 })
+
+router.get('/steam-games', async (request, response) => {
+    const steamGames = new SteamGames();
+    const game = await steamGames.getGameInfoByName('Starfield');
+    
+    response.status(200).json(game);
+});
 
 module.exports = router;
