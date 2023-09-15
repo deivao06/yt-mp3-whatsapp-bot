@@ -6,6 +6,7 @@ const YoutubeMusicDownloader = require('./Modules/youtube-music-downloader.js');
 const DiceRoller = require('./Modules/dice-roller.js');
 const Waifu = require('./Modules/waifu.js');
 const Notequest = require('./Modules/notequest.js');
+const SteamGames = require('./Modules/steam-games.js');
 
 class WhatsappWebClient {
     constructor() {
@@ -16,7 +17,8 @@ class WhatsappWebClient {
             {"roll": async (message) => { return await this.rollDice(message) }},
             {"sticker": async (message) => { return this.imageToGif(message) }},
             {"waifu": async (message) => { return this.waifu(message) }},
-            {"notequest": async (message) => { return this.notequest(message) }}
+            {"notequest": async (message) => { return this.notequest(message) }},
+            {"steam": async (message) => { return this.getSteamGameInfo(message) }}
         ];
 
         this.wwebClient = new Client({ authStrategy: new LocalAuth(), ffmpegPath: '../ffmpeg/ffmpeg-master-latest-win64-gpl/bin/ffmpeg.exe' });
@@ -181,6 +183,82 @@ class WhatsappWebClient {
         }
 
         await message.reply(text);
+    }
+
+    async getSteamGameInfo(message) {
+        const chat = await message.getChat();
+        const contact = await message.getContact();
+
+        console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+
+        var commandSplit = message.body.split(" ");
+        commandSplit.shift();
+        var gameName = commandSplit.join(" ");
+
+        if(!gameName) {
+            await message.reply("Nome do jogo é obrigatório.");
+            return;
+        }
+
+        const steamGames = new SteamGames();
+        const game = await steamGames.getGameInfoByName(gameName);
+
+        if(!game.error) {
+            const media = await MessageMedia.fromUrl(game.data.image);
+            const price = game.data.free ? 'Gratuito' : game.data.price.final_formatted;
+    
+            var text = "";
+    
+            text += `*Nome:* ${game.data.name}\n\n`;
+            text += `*Jogadores Online:* ${game.data.player_count}\n\n`;
+            text += `*Preço:* ${price}\n`;
+            text += `*Descrição:* ${game.data.description}\n`;
+            text += `*---------------------------------*\n`;
+            text += `*Desenvolvedores:*\n`;
+            if(Object.keys(game.data.developers).length > 0) {
+                for(const key in game.data.developers) {
+                    var developer = game.data.developers[key];
+                    text += `-${developer}\n`;
+                }
+            } else {
+                text += "-Nenhum\n";
+            }
+            text += `*---------------------------------*\n`;
+            text += `*Publicadoras:*\n`;
+            if(Object.keys(game.data.publishers).length > 0) {
+                for(const key in game.data.publishers) {
+                    var publisher = game.data.publishers[key];
+                    text += `-${publisher}\n`;
+                }
+            } else {
+                text += "-Nenhuma\n";
+            }
+            text += `*---------------------------------*\n`;
+            text += `*Categorias:*\n`;
+            if(Object.keys(game.data.categories).length > 0) {
+                for(const key in game.data.categories) {
+                    var categorie = game.data.categories[key];
+                    text += `-${categorie.description}\n`;
+                }
+            } else {
+                text += "-Nenhuma\n";
+            }
+            text += `*---------------------------------*\n`;
+            text += `*Generos:*\n`;
+            if(Object.keys(game.data.genres).length > 0) {
+                for(const key in game.data.genres) {
+                    var genre = game.data.genres[key];
+                    text += `-${genre.description}\n`;
+                }
+            } else {
+                text += "-Nenhuma\n";
+            }
+
+            await chat.sendMessage(text, {media: media});
+            return;
+        }
+
+        await message.reply(game.message);
     }
 }
 

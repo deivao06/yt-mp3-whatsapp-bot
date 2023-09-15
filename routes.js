@@ -46,8 +46,10 @@ router.get('/notequest', async (request, response) => {
 })
 
 router.get('/steam-games', async (request, response) => {
+    var gameName = request.query.message;
+
     const steamGames = new SteamGames();
-    const game = await steamGames.getGameInfoByName('Starfield');
+    const game = await steamGames.getGameInfoByName(gameName);
     
     response.status(200).json(game);
 });
