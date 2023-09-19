@@ -13,6 +13,7 @@ class WhatsappWebClient {
         this.prefixes = ["!", "-"];
         this.commands = [
             {"p": async (message) => { return await this.youtubeMusicDownloader(message) }},
+            // {"youtube": async (message) => { return await this.youtubeVideoDownloader(message) }},
             {"everyone": async (message) => { return await this.mentionEveryone(message) }},
             {"roll": async (message) => { return await this.rollDice(message) }},
             {"sticker": async (message) => { return this.imageToGif(message) }},
@@ -55,20 +56,82 @@ class WhatsappWebClient {
         var videoNameOrUrl = commandSplit.join(" ");
 
         const youtubeMusicDownloader = new YoutubeMusicDownloader(__dirname + '/Files');
+        
+        console.log(`Downloading: ${videoNameOrUrl}`);
         const songData = await youtubeMusicDownloader.downloadSong(videoNameOrUrl);
 
-        try {
-            if(!songData.error) {
+        if(!songData.error) {
+            console.log(`Success! ` + songData.path);
+
+            try {
+                console.log('Sending media on message: ' + songData.path);
+
                 const media = MessageMedia.fromFilePath(songData.path);
-                await message.reply(media);
+
+                var text = "";
+
+                text += `@${contact.id.user}\n\n`;
+                text += `*Nome:* ${songData.name}\n`;
+                text += `*Url:* ${songData.url}`;
+
+                var infoMessage = await chat.sendMessage(text, {mentions: [contact]});
+                await infoMessage.reply(media);
+
                 fs.unlinkSync(songData.path);
-            } else {
-                await chat.sendMessage(`@${contact.id.user} ${songData.message}`, {mentions: [contact]});
+            } catch (e) {
+                console.log('Error when sending media on message: ' + e.message);
+
+                await chat.sendMessage(`@${contact.id.user} ${'Error when sending media on message: ' + e.message}`, {mentions: [contact]});
+
+                fs.unlinkSync(songData.path);
             }
-        } catch (e) {
-            console.error(e.message);
-            fs.unlinkSync(songData.path);
-            await chat.sendMessage(`@${contact.id.user} ${e.message}`, {mentions: [contact]});
+        } else {
+            await chat.sendMessage(`@${contact.id.user} ${songData.message}`, {mentions: [contact]});
+        }
+    }
+
+    async youtubeVideoDownloader(message) {
+        const chat = await message.getChat();
+        const contact = await message.getContact();
+
+        console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+
+        var commandSplit = message.body.split(" ");
+        commandSplit.shift();
+        var videoNameOrUrl = commandSplit.join(" ");
+
+        const youtubeMusicDownloader = new YoutubeMusicDownloader(__dirname + '/Files');
+        
+        console.log(`Downloading: ${videoNameOrUrl}`);
+        const videoData = await youtubeMusicDownloader.downloadVideo(videoNameOrUrl);
+
+        if(!videoData.error) {
+            console.log(`Success! ` + videoData.path);
+
+            try {
+                console.log('Sending media on message: ' + videoData.path);
+
+                const media = MessageMedia.fromFilePath(videoData.path);
+
+                var text = "";
+
+                text += `@${contact.id.user}\n\n`;
+                text += `*Nome:* ${videoData.name}\n`;
+                text += `*Url:* ${videoData.url}`;
+
+                var infoMessage = await chat.sendMessage(text, {mentions: [contact]});
+                await infoMessage.reply(media);
+
+                fs.unlinkSync(videoData.path);
+            } catch (e) {
+                console.log(e);
+
+                await chat.sendMessage(`@${contact.id.user} ${'Error when sending media on message: ' + e.message}`, {mentions: [contact]});
+
+                fs.unlinkSync(videoData.path);
+            }
+        } else {
+            await chat.sendMessage(`@${contact.id.user} ${videoData.message}`, {mentions: [contact]});
         }
     }
 

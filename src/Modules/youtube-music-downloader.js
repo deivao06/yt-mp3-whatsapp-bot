@@ -3,6 +3,7 @@ const ytdl = require('ytdl-core');
 const cp = require('child_process');
 const path = require('path');
 const ffmpeg = require('ffmpeg-static');
+const fs = require('fs');
 
 class YoutubeMusicDownloader {
     constructor(outputDir) {
@@ -13,50 +14,106 @@ class YoutubeMusicDownloader {
     async downloadSong(videoName) {
         var searchData = null;
 
-        if(videoName.includes('http')) {
-            searchData = {
-                error: false,
-                url: videoName
+        try {
+            if(videoName.includes('http')) {
+                searchData = {
+                    error: false,
+                    url: videoName
+                }
+            } else {
+                searchData = await this.searchYoutubeVideo(videoName);
             }
-        } else {
-            searchData = await this.searchYoutubeVideo(videoName);
-        }
-        
-        if(!searchData.error) {
-            var url = searchData.url;
-
-            const videoInfo = await ytdl.getInfo(url);
-            const outputFile = this.getOutputFile(videoInfo.videoDetails.title);
-            const videoData = await this.downloadVideo(videoInfo);
-
-            this.videoToAudio(videoData, outputFile);
+            
+            if(!searchData.error) {
+                var url = searchData.url;
+                
+                console.log('Found song: ' + url);
+    
+                const videoInfo = await ytdl.getInfo(url);
+                const outputFile = this.getOutputFile(videoInfo.videoDetails.title);
+                const videoData = await this.getVideo(videoInfo);
+    
+                this.videoToAudio(videoData, outputFile);
+    
+                return {
+                    error: false,
+                    name: searchData.name,
+                    url: searchData.url,
+                    path: outputFile
+                }
+            } else {
+                return searchData;
+            }
+        } catch (e) {
+            console.log('Error while downloading song: ' + e.message);
 
             return {
-                error: false,
-                path: outputFile
+                error: true,
+                message: e.message,
             }
-        } else {
-            return searchData;
         }
     }
 
-    async downloadVideo(videoInfo) {
-        const buffers = [];
-        const stream = ytdl.downloadFromInfo(videoInfo, { quality: 'highestaudio' });
+    async downloadVideo(videoName) {
+        var searchData = null;
+
+        try {
+            if(videoName.includes('http')) {
+                searchData = {
+                    error: false,
+                    url: videoName
+                }
+            } else {
+                searchData = await this.searchYoutubeVideo(videoName);
+            }
+            
+            if(!searchData.error) {
+                var url = searchData.url;
+                
+                console.log('Found video: ' + url);
     
+                const videoInfo = await ytdl.getInfo(url);
+                const outputFile = this.getOutputFile(videoInfo.videoDetails.title, '.mp4');
+                const videoStream = await this.getVideo(videoInfo);
+
+                //TODO DESCOBRIR COMO BAIXAR O VIDEO COM AWAIT
+
+                return {
+                    error: false,
+                    name: searchData.name,
+                    url: searchData.url,
+                    path: outputFile
+                }
+            } else {
+                return searchData;
+            }
+        } catch (e) {
+            console.log('Error while downloading video: ' + e.message);
+
+            return {
+                error: true,
+                message: e.message,
+            }
+        }
+    }
+
+    async getVideo(videoInfo) {
+        const buffers = [];
+        const videoStream = ytdl.downloadFromInfo(videoInfo, { quality: 'highestaudio' });
+
         return new Promise((resolve, reject) => {
-            stream.on('data', (chunk) => {
+            videoStream.on('data', (chunk) => {
                 buffers.push(chunk);
             });
-            stream.on('end', () => {
+            videoStream.on('end', () => {
                 resolve(Buffer.concat(buffers));
             });
-            stream.on('error', (err) => {
+            videoStream.on('error', (err) => {
                 reject(err);
             });
         });
     }
-  
+
     async searchYoutubeVideo(videoName) {
         const searchResults = await usetube.searchVideo(videoName);
 
@@ -80,7 +137,7 @@ class YoutubeMusicDownloader {
         });
     }
 
-    getOutputFile(videoTitle) {
+    getOutputFile(videoTitle, type = '.mp3') {
         const baseFileName = videoTitle
             .replace(/\s*[([].*?[)\]]\s*/g, '')
             .replace(/[^a-z0-9]/gi, '_')
@@ -89,7 +146,7 @@ class YoutubeMusicDownloader {
             .join('_')
             .toLowerCase();
 
-        return path.join(this.outputDir, baseFileName + '.mp3');
+        return path.join(this.outputDir, baseFileName + type);
     }
 }
 

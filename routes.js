@@ -1,6 +1,5 @@
 const express = require('express');
 const router = express.Router();
-const axios = require('axios');
 
 const YoutubeMusicDownloader = require('./src/Modules/youtube-music-downloader.js');
 const DiceRoller = require('./src/Modules/dice-roller.js');
@@ -14,6 +13,19 @@ router.get('/youtube-music-downloader', async (request, response) => {
 
     try {
         var songData = await youtubeMusicDownloader.downloadSong(videoNameOrUrl);
+        response.status(200).json(songData);
+    } catch (e) {
+        console.log(e.message);
+        response.status(500).json({ message: e.message });
+    }
+});
+
+router.get('/youtube-video-downloader', async (request, response) => {
+    const videoNameOrUrl = request.query.message;
+    const youtubeMusicDownloader = new YoutubeMusicDownloader('./src/Files');
+
+    try {
+        var songData = await youtubeMusicDownloader.downloadVideo(videoNameOrUrl);
         response.status(200).json(songData);
     } catch (e) {
         console.log(e.message);
