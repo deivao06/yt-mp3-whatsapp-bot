@@ -74,16 +74,20 @@ class YoutubeMusicDownloader {
     
                 const videoInfo = await ytdl.getInfo(url);
                 const outputFile = this.getOutputFile(videoInfo.videoDetails.title, '.mp4');
-                const videoStream = await this.getVideo(videoInfo);
+                const videoStream = ytdl.downloadFromInfo(videoInfo);
 
-                //TODO DESCOBRIR COMO BAIXAR O VIDEO COM AWAIT
+                videoStream.pipe(fs.createWriteStream(outputFile));
 
-                return {
-                    error: false,
-                    name: searchData.name,
-                    url: searchData.url,
-                    path: outputFile
-                }
+                return new Promise((resolve, reject) => {
+                    videoStream.on('finish', () => {
+                        resolve({
+                            error: false,
+                            name: searchData.name,
+                            url: searchData.url,
+                            path: outputFile
+                        });
+                    });
+                });
             } else {
                 return searchData;
             }

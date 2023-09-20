@@ -12,17 +12,24 @@ class WhatsappWebClient {
     constructor() {
         this.prefixes = ["!", "-"];
         this.commands = [
-            {"p": async (message) => { return await this.youtubeMusicDownloader(message) }},
-            // {"youtube": async (message) => { return await this.youtubeVideoDownloader(message) }},
-            {"everyone": async (message) => { return await this.mentionEveryone(message) }},
-            {"roll": async (message) => { return await this.rollDice(message) }},
-            {"sticker": async (message) => { return this.imageToGif(message) }},
-            {"waifu": async (message) => { return this.waifu(message) }},
-            {"notequest": async (message) => { return this.notequest(message) }},
-            {"steam": async (message) => { return this.getSteamGameInfo(message) }}
+            { "p": async (message) => { return await this.youtubeMusicDownloader(message) }},
+            { "youtube": async (message) => { return await this.youtubeVideoDownloader(message) }},
+            { "everyone": async (message) => { return await this.mentionEveryone(message) }},
+            { "roll": async (message) => { return await this.rollDice(message) }},
+            { "sticker": async (message) => { return this.imageToGif(message) }},
+            { "waifu": async (message) => { return this.waifu(message) }},
+            { "notequest": async (message) => { return this.notequest(message) }},
+            { "steam": async (message) => { return this.getSteamGameInfo(message) }}
         ];
 
-        this.wwebClient = new Client({ authStrategy: new LocalAuth(), ffmpegPath: '../ffmpeg/ffmpeg-master-latest-win64-gpl/bin/ffmpeg.exe' });
+        this.wwebClient = new Client({ 
+            authStrategy: new LocalAuth(), 
+            ffmpegPath: '../ffmpeg/ffmpeg-master-latest-win64-gpl/bin/ffmpeg.exe',
+            // puppeteer: {
+            //     executablePath: 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
+            // }
+        });
+
         this.wwebClient.on('qr', qr => { qrcode.generate(qr, {small: true}); });
         this.wwebClient.on('ready', () => { console.log('Whatsapp web client is ready! \n'); });
         this.wwebClient.on('message_create', async (message) => { await this.handleMessage(message); });
@@ -91,48 +98,50 @@ class WhatsappWebClient {
     }
 
     async youtubeVideoDownloader(message) {
-        const chat = await message.getChat();
-        const contact = await message.getContact();
+        const media = MessageMedia.fromFilePath('C:\\Users\\david.moura\\Desktop\\aprendizado\\whats-web\\src\\Files\\twenty_one_pilots_pet_cheetah.mp4');
 
-        console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+        await message.reply(media);
+        // const contact = await message.getContact();
 
-        var commandSplit = message.body.split(" ");
-        commandSplit.shift();
-        var videoNameOrUrl = commandSplit.join(" ");
+        // console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
 
-        const youtubeMusicDownloader = new YoutubeMusicDownloader(__dirname + '/Files');
+        // var commandSplit = message.body.split(" ");
+        // commandSplit.shift();
+        // var videoNameOrUrl = commandSplit.join(" ");
+
+        // const youtubeMusicDownloader = new YoutubeMusicDownloader(__dirname + '/Files');
         
-        console.log(`Downloading: ${videoNameOrUrl}`);
-        const videoData = await youtubeMusicDownloader.downloadVideo(videoNameOrUrl);
+        // console.log(`Downloading: ${videoNameOrUrl}`);
+        // const videoData = await youtubeMusicDownloader.downloadVideo(videoNameOrUrl);
+        // console.log(videoData);
+        // if(!videoData.error) {
+        //     console.log(`Success! ` + videoData.path);
 
-        if(!videoData.error) {
-            console.log(`Success! ` + videoData.path);
+        //     try {
+        //         console.log('Sending media on message: ' + videoData.path);
 
-            try {
-                console.log('Sending media on message: ' + videoData.path);
+        //         const media = MessageMedia.fromFilePath(videoData.path);
 
-                const media = MessageMedia.fromFilePath(videoData.path);
+        //         var text = "";
 
-                var text = "";
+        //         text += `@${contact.id.user}\n\n`;
+        //         text += `*Nome:* ${videoData.name}\n`;
+        //         text += `*Url:* ${videoData.url}`;
 
-                text += `@${contact.id.user}\n\n`;
-                text += `*Nome:* ${videoData.name}\n`;
-                text += `*Url:* ${videoData.url}`;
+        //         var infoMessage = await chat.sendMessage(text, {mentions: [contact]});
+        //         await infoMessage.reply(media);
 
-                var infoMessage = await chat.sendMessage(text, {mentions: [contact]});
-                await infoMessage.reply(media);
+        //         fs.unlinkSync(videoData.path);
+        //     } catch (e) {
+        //         console.log(e);
 
-                fs.unlinkSync(videoData.path);
-            } catch (e) {
-                console.log(e);
+        //         await chat.sendMessage(`@${contact.id.user} ${'Error when sending media on message: ' + e.message}`, {mentions: [contact]});
 
-                await chat.sendMessage(`@${contact.id.user} ${'Error when sending media on message: ' + e.message}`, {mentions: [contact]});
-
-                fs.unlinkSync(videoData.path);
-            }
-        } else {
-            await chat.sendMessage(`@${contact.id.user} ${videoData.message}`, {mentions: [contact]});
-        }
+        //         fs.unlinkSync(videoData.path);
+        //     }
+        // } else {
+        //     await chat.sendMessage(`@${contact.id.user} ${videoData.message}`, {mentions: [contact]});
+        // }
     }
 
     async mentionEveryone(message) {
