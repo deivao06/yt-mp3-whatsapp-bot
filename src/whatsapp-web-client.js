@@ -13,7 +13,7 @@ class WhatsappWebClient {
         this.prefixes = ["!", "-"];
         this.commands = [
             { "p": async (message) => { return await this.youtubeMusicDownloader(message) }},
-            { "youtube": async (message) => { return await this.youtubeVideoDownloader(message) }},
+            // { "youtube": async (message) => { return await this.youtubeVideoDownloader(message) }},
             { "everyone": async (message) => { return await this.mentionEveryone(message) }},
             { "roll": async (message) => { return await this.rollDice(message) }},
             { "sticker": async (message) => { return this.imageToGif(message) }},
@@ -22,12 +22,9 @@ class WhatsappWebClient {
             { "steam": async (message) => { return this.getSteamGameInfo(message) }}
         ];
 
-        this.wwebClient = new Client({ 
+        this.wwebClient = new Client({
             authStrategy: new LocalAuth(), 
             ffmpegPath: '../ffmpeg/ffmpeg-master-latest-win64-gpl/bin/ffmpeg.exe',
-            // puppeteer: {
-            //     executablePath: 'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe',
-            // }
         });
 
         this.wwebClient.on('qr', qr => { qrcode.generate(qr, {small: true}); });
@@ -98,6 +95,7 @@ class WhatsappWebClient {
     }
 
     async youtubeVideoDownloader(message) {
+        const chat = await message.getChat();
         const contact = await message.getContact();
 
         console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
@@ -110,7 +108,7 @@ class WhatsappWebClient {
         
         console.log(`Downloading: ${videoNameOrUrl}`);
         const videoData = await youtubeMusicDownloader.downloadVideo(videoNameOrUrl);
-        console.log(videoData);
+
         if(!videoData.error) {
             console.log(`Success! ` + videoData.path);
 
