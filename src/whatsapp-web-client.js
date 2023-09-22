@@ -98,50 +98,47 @@ class WhatsappWebClient {
     }
 
     async youtubeVideoDownloader(message) {
-        const media = MessageMedia.fromFilePath('C:\\Users\\david.moura\\Desktop\\aprendizado\\whats-web\\src\\Files\\twenty_one_pilots_pet_cheetah.mp4');
+        const contact = await message.getContact();
 
-        await message.reply(media);
-        // const contact = await message.getContact();
+        console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
 
-        // console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+        var commandSplit = message.body.split(" ");
+        commandSplit.shift();
+        var videoNameOrUrl = commandSplit.join(" ");
 
-        // var commandSplit = message.body.split(" ");
-        // commandSplit.shift();
-        // var videoNameOrUrl = commandSplit.join(" ");
-
-        // const youtubeMusicDownloader = new YoutubeMusicDownloader(__dirname + '/Files');
+        const youtubeMusicDownloader = new YoutubeMusicDownloader(__dirname + '/Files');
         
-        // console.log(`Downloading: ${videoNameOrUrl}`);
-        // const videoData = await youtubeMusicDownloader.downloadVideo(videoNameOrUrl);
-        // console.log(videoData);
-        // if(!videoData.error) {
-        //     console.log(`Success! ` + videoData.path);
+        console.log(`Downloading: ${videoNameOrUrl}`);
+        const videoData = await youtubeMusicDownloader.downloadVideo(videoNameOrUrl);
+        console.log(videoData);
+        if(!videoData.error) {
+            console.log(`Success! ` + videoData.path);
 
-        //     try {
-        //         console.log('Sending media on message: ' + videoData.path);
+            try {
+                console.log('Sending media on message: ' + videoData.path);
 
-        //         const media = MessageMedia.fromFilePath(videoData.path);
+                const media = MessageMedia.fromFilePath(videoData.path);
 
-        //         var text = "";
+                var text = "";
 
-        //         text += `@${contact.id.user}\n\n`;
-        //         text += `*Nome:* ${videoData.name}\n`;
-        //         text += `*Url:* ${videoData.url}`;
+                text += `@${contact.id.user}\n\n`;
+                text += `*Nome:* ${videoData.name}\n`;
+                text += `*Url:* ${videoData.url}`;
 
-        //         var infoMessage = await chat.sendMessage(text, {mentions: [contact]});
-        //         await infoMessage.reply(media);
+                var infoMessage = await chat.sendMessage(text, {mentions: [contact]});
+                await infoMessage.reply(media);
 
-        //         fs.unlinkSync(videoData.path);
-        //     } catch (e) {
-        //         console.log(e);
+                fs.unlinkSync(videoData.path);
+            } catch (e) {
+                console.log(e);
 
-        //         await chat.sendMessage(`@${contact.id.user} ${'Error when sending media on message: ' + e.message}`, {mentions: [contact]});
+                await chat.sendMessage(`@${contact.id.user} ${'Error when sending media on message: ' + e.message}`, {mentions: [contact]});
 
-        //         fs.unlinkSync(videoData.path);
-        //     }
-        // } else {
-        //     await chat.sendMessage(`@${contact.id.user} ${videoData.message}`, {mentions: [contact]});
-        // }
+                fs.unlinkSync(videoData.path);
+            }
+        } else {
+            await chat.sendMessage(`@${contact.id.user} ${videoData.message}`, {mentions: [contact]});
+        }
     }
 
     async mentionEveryone(message) {
