@@ -8,6 +8,7 @@ const Waifu = require('./Modules/waifu.js');
 const Notequest = require('./Modules/notequest.js');
 const SteamGames = require('./Modules/steam-games.js');
 const Meme = require('./Modules/meme-api.js');
+const MonsterHunterWorldApi = require('./Modules/monster-hunter-world.js');
 
 class WhatsappWebClient {
     constructor() {
@@ -22,6 +23,7 @@ class WhatsappWebClient {
             { "notequest": async (message) => { return this.notequest(message) }},
             { "steam": async (message) => { return this.getSteamGameInfo(message) }},
             { "meme": async (message) => { return this.getMeme(message) }},
+            { "mhw": async (message) => { return this.getMonsterHunterWorldInfo(message) }}
         ];
 
         this.wwebClient = new Client({
@@ -351,6 +353,80 @@ class WhatsappWebClient {
         const contact = await message.getContact();
 
         console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+
+        var commandSplit = message.body.split(" ");
+        
+        if(commandSplit.length < 3) {
+            await message.reply("Comando ta errado!");
+            return;
+        }
+
+        commandSplit.shift();
+        var infoType = commandSplit[0];
+        commandSplit.shift();
+        var infoName = commandSplit.join(" ");
+
+        if(infoType == 'monster') {
+            const mhw = new MonsterHunterWorldApi();
+            const data = await mhw.getMonster(infoName);
+
+            if(data.error) {
+                await message.reply(data.message);
+                return; 
+            }
+
+            var monsterInfo = data.data;
+            var text = "";
+
+            text += `*Name:* ${monsterInfo.name}\n`;
+            text += `*Type* ${monsterInfo.type}\n`;
+            text += `*Species:* ${monsterInfo.species}\n`;
+            text += `*Description:* ${monsterInfo.description}\n`;
+            text += `*---------------------------------*\n`;
+            text += `*Elements:*\n`;
+            if(Object.keys(monsterInfo.elements).length > 0) {
+                for(const key in monsterInfo.elements) {
+                    var element = monsterInfo.elements[key];
+                    text += `-${element}\n`;
+                }
+            } else {
+                text += "-none\n";
+            }
+            text += `*---------------------------------*\n`;
+            text += `*Resistances:*\n`;
+            if(Object.keys(monsterInfo.resistances).length > 0) {
+                for(const key in monsterInfo.resistances) {
+                    var resistance = monsterInfo.resistances[key];
+                    text += `-${resistance.element}\n`;
+                }
+            } else {
+                text += "-none\n";
+            }
+            text += `*---------------------------------*\n`;
+            text += `*Weaknesses:*\n`;
+            if(Object.keys(monsterInfo.weaknesses).length > 0) {
+                for(const key in monsterInfo.weaknesses) {
+                    var weakness = monsterInfo.weaknesses[key];
+
+                    var startText = "";
+                    for(var i = 0; i < weakness.stars; i++) {
+                        startText += " * ";
+                    }
+
+                    text += `-${weakness.element} -> ${startText}\n`;
+                }
+            } else {
+                text += "-none\n";
+            }
+
+            var monsterNameSplit = monsterInfo.name.toLowerCase().split(" ");
+            monsterNameSplit = monsterNameSplit.join("_");
+
+            const media = await MessageMedia.fromUrl(`https://monsterhunterworld.wiki.fextralife.com/file/Monster-Hunter-World/mhw-${monsterNameSplit}_render_001.png`);
+
+            await chat.sendMessage(text, {media: media});
+            return;
+        }
     }
 }
 
