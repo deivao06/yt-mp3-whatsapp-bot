@@ -7,6 +7,7 @@ const DiceRoller = require('./Modules/dice-roller.js');
 const Waifu = require('./Modules/waifu.js');
 const Notequest = require('./Modules/notequest.js');
 const SteamGames = require('./Modules/steam-games.js');
+const Meme = require('./Modules/meme-api.js');
 
 class WhatsappWebClient {
     constructor() {
@@ -19,7 +20,8 @@ class WhatsappWebClient {
             { "sticker": async (message) => { return this.imageToGif(message) }},
             { "waifu": async (message) => { return this.waifu(message) }},
             { "notequest": async (message) => { return this.notequest(message) }},
-            { "steam": async (message) => { return this.getSteamGameInfo(message) }}
+            { "steam": async (message) => { return this.getSteamGameInfo(message) }},
+            { "meme": async (message) => { return this.getMeme(message) }},
         ];
 
         this.wwebClient = new Client({
@@ -205,7 +207,23 @@ class WhatsappWebClient {
         const waifu = new Waifu();
         const media = await MessageMedia.fromUrl(await waifu.getWaifu(nsfw));
     
-        await chat.sendMessage(media, {sendMediaAsSticker: true, stickerAuthor: "Sticker", stickerName: "Sticker", stickerCategories: []});
+        if(nsfw == 'nsfw') {
+            await chat.sendMessage(media, {isViewOnce: true});
+        } else {
+            await chat.sendMessage(media, {sendMediaAsSticker: true, stickerAuthor: "Sticker", stickerName: "Sticker", stickerCategories: []});
+        }
+    }
+
+    async getMeme(message) {
+        const chat = await message.getChat();
+        const contact = await message.getContact();
+    
+        console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+
+        const meme = new Meme();
+        const media = await MessageMedia.fromUrl(await meme.getMeme());
+    
+        await message.reply(media);
     }
 
     async notequest(message) {
@@ -326,6 +344,13 @@ class WhatsappWebClient {
         }
 
         await message.reply(game.message);
+    }
+
+    async getMonsterHunterWorldInfo(message) {
+        const chat = await message.getChat();
+        const contact = await message.getContact();
+
+        console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
     }
 }
 
