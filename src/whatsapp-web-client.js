@@ -23,7 +23,8 @@ class WhatsappWebClient {
             { "notequest": async (message) => { return this.notequest(message) }},
             { "steam": async (message) => { return this.getSteamGameInfo(message) }},
             { "meme": async (message) => { return this.getMeme(message) }},
-            { "mhw": async (message) => { return this.getMonsterHunterWorldInfo(message) }}
+            { "mhw": async (message) => { return this.getMonsterHunterWorldInfo(message) }},
+            { "mhr": async (message) => { return this}}
         ];
 
         this.wwebClient = new Client({
