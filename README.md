@@ -13,11 +13,11 @@ You can change {prefix} in index.js, by now it is "!"
 | {prefix}p      | Download video from youtube, transform in mp3 and send in whatsapp | !p Rick Astley - Never Gonna Give You Up (Official Music Video) |
 | {prefix}everyone     | Mention everyone | |
 | {prefix}roll      | Roll a dice | !roll 1d6 |
-| {prefix}timetoduel  | Random Yugioh card | |
-| {prefix}anime      | Get anime info from MyAnimeList | !anime Boku no Hero |
-| {prefix}animem      | Get anime movies info from MyAnimeList | !animem Dragon Ball |
-| {prefix}sticker      | Get a image and send it back as sticker | |
-| {prefix}movie      | Get movies info from IMDB | !movie Avengers |
+| {prefix}sticker      | Get a image or a video and send it back as sticker | |
+| {prefix}steam      | Get Steam game info | !steam Counter Strike: Global Offensive |
+| {prefix}meme      | Get a random meme | !meme |
+| {prefix}mhw      | Get a data from Monster Hunter World Api | !mhw Anjanath |
+
 
 ## Running on Localhost
 
