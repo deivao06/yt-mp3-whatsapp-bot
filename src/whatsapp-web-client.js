@@ -1,6 +1,7 @@
 const fs = require('fs');
 const qrcode = require('qrcode-terminal');
 const { Client , LocalAuth, MessageMedia } = require('whatsapp-web.js');
+const ffmpeg = require('ffmpeg-static');
 
 const YoutubeMusicDownloader = require('./Modules/youtube-music-downloader.js');
 const DiceRoller = require('./Modules/dice-roller.js');
@@ -28,7 +29,7 @@ class WhatsappWebClient {
 
         this.wwebClient = new Client({
             authStrategy: new LocalAuth(), 
-            ffmpegPath: '../ffmpeg/ffmpeg-master-latest-win64-gpl/bin/ffmpeg.exe',
+            ffmpegPath: ffmpeg,
         });
 
         this.wwebClient.on('qr', qr => { qrcode.generate(qr, {small: true}); });
