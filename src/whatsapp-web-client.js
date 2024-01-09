@@ -2,7 +2,7 @@ const fs = require('fs');
 const qrcode = require('qrcode-terminal');
 const { Client , LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const ffmpeg = require('ffmpeg-static');
-const chromiumBinary = require('chromium-binary');
+const chromiumBinary = require('chromium');
 
 const YoutubeMusicDownloader = require('./Modules/youtube-music-downloader.js');
 const DiceRoller = require('./Modules/dice-roller.js');

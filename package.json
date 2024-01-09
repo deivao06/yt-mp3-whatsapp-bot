@@ -13,7 +13,7 @@
   "dependencies": {
     "axios": "^1.4.0",
     "cheerio": "^1.0.0-rc.12",
-    "chromium-binary": "^83.0.4103-116",
+    "chromium": "^3.0.3",
     "express": "^4.18.2",
     "ffmpeg": "^0.0.4",
     "ffmpeg-static": "^5.2.0",
