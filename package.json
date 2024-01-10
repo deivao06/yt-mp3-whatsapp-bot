@@ -23,7 +23,7 @@
     "sqlite": "^4.2.1",
     "sqlite3": "^5.1.6",
     "usetube": "^2.2.7",
-    "whatsapp-web.js": "^1.23.0",
+    "whatsapp-web.js": "1.23.1-alpha.3",
     "ytdl-core": "^4.11.5",
     "ytdl-mp3": "^3.1.0",
     "ytsr": "^3.8.2"
