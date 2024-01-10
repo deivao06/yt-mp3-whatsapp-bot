@@ -33,7 +33,7 @@ class WhatsappWebClient {
             ffmpegPath: ffmpeg,
             puppeteer: {
                 executablePath: chromiumBinary.path,
-                args: ['--no-sandbox']
+                args: ['--no-sandbox', '--disable-setuid-sandbox']
             }
         });
 
