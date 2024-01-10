@@ -24,7 +24,7 @@
     "sqlite3": "^5.1.6",
     "usetube": "^2.2.7",
     "whatsapp-web.js": "^1.21.0",
-    "ytdl-core": "git+ssh://git@github.com:khlevon/node-ytdl-core.git#v4.11.4-patch.2",
+    "ytdl-core": "^4.11.5",
     "ytdl-mp3": "^3.1.0",
     "ytsr": "^3.8.2"
   }
