@@ -37,6 +37,7 @@ class WhatsappWebClient {
         });
 
         this.wwebClient.on('qr', qr => { qrcode.generate(qr, {small: true}); });
+        this.wwebClient.on('auth_failure', message => { console.log(message) });
         this.wwebClient.on('ready', () => { console.log('Whatsapp web client is ready! \n'); });
         this.wwebClient.on('message_create', async (message) => { await this.handleMessage(message); });
         this.wwebClient.initialize();
