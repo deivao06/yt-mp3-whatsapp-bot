@@ -89,7 +89,7 @@ class WhatsappWebClient {
                 text += `*Nome:* ${songData.name}\n`;
                 text += `*Url:* ${songData.url}`;
 
-                var infoMessage = await chat.sendMessage(text, {mentions: [contact]});
+                var infoMessage = await chat.sendMessage(text, {mentions: [contact], linkPreview: true});
                 await infoMessage.reply(media);
 
                 fs.unlinkSync(songData.path);
