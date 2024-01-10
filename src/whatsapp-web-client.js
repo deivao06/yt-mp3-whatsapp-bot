@@ -32,7 +32,8 @@ class WhatsappWebClient {
             authStrategy: new LocalAuth(), 
             ffmpegPath: ffmpeg,
             puppeteer: {
-                executablePath: chromiumBinary.path
+                executablePath: chromiumBinary.path,
+                args: ['--no-sandbox']
             }
         });
 
