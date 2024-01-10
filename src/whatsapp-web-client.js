@@ -29,6 +29,7 @@ class WhatsappWebClient {
         ];
 
         this.wwebClient = new Client({
+            authStrategy: new LocalAuth(),
             ffmpegPath: ffmpeg,
             puppeteer: {
                 executablePath: chromiumBinary.path,
