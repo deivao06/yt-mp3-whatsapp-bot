@@ -6,6 +6,7 @@ const DiceRoller = require('./src/Modules/dice-roller.js');
 const Waifu = require('./src/Modules/waifu.js');
 const Notequest = require('./src/Modules/notequest.js');
 const SteamGames = require('./src/Modules/steam-games.js');
+const Animes = require('./src/Modules/animes.js');
 
 router.get('/youtube-music-downloader', async (request, response) => {
     const videoNameOrUrl = request.query.message;
@@ -65,5 +66,13 @@ router.get('/steam-games', async (request, response) => {
     
     response.status(200).json(game);
 });
+
+router.get('/anime', async (request, response) => {
+    var animeName = request.query.message;
+    const animes = new Animes();
+    const anime = await animes.getAnimeData(animeName, 'tv');
+
+    response.status(200).json(anime);
+})
 
 module.exports = router;
