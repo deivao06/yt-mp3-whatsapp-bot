@@ -27,7 +27,7 @@ class WhatsappWebClient {
             { "steam": async (message) => { return this.getSteamGameInfo(message) }},
             { "meme": async (message) => { return this.getMeme(message) }},
             { "mhw": async (message) => { return this.getMonsterHunterWorldInfo(message) }},
-            { "anime": async (message) => { return this.getAnimeDataByName(message) }}
+            { "anime": async (message) => { return this.getAnimeDataByName(message, 'tv') }}
         ];
 
         this.wwebClient = new Client({
