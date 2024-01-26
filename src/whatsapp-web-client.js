@@ -11,6 +11,7 @@ const Notequest = require('./Modules/notequest.js');
 const SteamGames = require('./Modules/steam-games.js');
 const Meme = require('./Modules/meme-api.js');
 const MonsterHunterWorldApi = require('./Modules/monster-hunter-world.js');
+const Animes = require('./Modules/animes.js');
 
 class WhatsappWebClient {
     constructor() {
@@ -26,6 +27,7 @@ class WhatsappWebClient {
             { "steam": async (message) => { return this.getSteamGameInfo(message) }},
             { "meme": async (message) => { return this.getMeme(message) }},
             { "mhw": async (message) => { return this.getMonsterHunterWorldInfo(message) }},
+            { "anime": async (message) => { return this.getAnimeDataByName(message) }}
         ];
 
         this.wwebClient = new Client({
@@ -433,6 +435,41 @@ class WhatsappWebClient {
 
             await chat.sendMessage(text, {media: media});
             return;
+        }
+    }
+
+    async getAnimeDataByName(message, type) {
+        const chat = await message.getChat();
+        const contact = await message.getContact();
+
+        console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+
+        var commandSplit = message.body.split(" ");
+        commandSplit.shift();
+        var animeName = commandSplit.join(" ");
+
+        if(!animeName) {
+            await message.reply("Nome do anime é obrigatório.");
+            return;
+        }
+
+        const animes = new Animes();
+        const anime = await animes.getAnimeData(animeName ,type);
+
+        if(!anime.error) {
+            var animeSummary = anime.data.image;
+
+            if(animeSummary.image) {
+                const media = await MessageMedia.fromUrl(animeSummary.image);
+    
+                await chat.sendMessage(`${animeSummary.title}\n${animeSummary.title_english}\n${animeSummary.title_portuguese}\n\n*Episódios*: ${animeSummary.episodes}\n*Nota*: ${animeSummary.score}\n\n${animeSummary.synopsis}`,
+                    {media: media}
+                );
+            } else {
+                await message.reply(`${animeSummary.title}\n${animeSummary.title_english}\n${animeSummary.title_portuguese}\n\n*Episódios*: ${animeSummary.episodes}\n*Nota*: ${animeSummary.score}\n\n${animeSummary.synopsis}`);
+            }
+        } else {
+            await message.reply(anime.message);
         }
     }
 }
