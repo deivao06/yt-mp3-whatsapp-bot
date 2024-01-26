@@ -304,7 +304,7 @@ class WhatsappWebClient {
             var text = "";
     
             text += `*Nome:* ${game.data.name}\n\n`;
-            text += `*Jogadores Online:* ${game.data.player_count}\n\n`;
+            text += `*Jogadores Online:* ${game.data.player_count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".")}\n\n`;
             text += `*Preço:* ${price}\n`;
             text += `*Descrição:* ${game.data.description}\n`;
             text += `*---------------------------------*\n`;
