@@ -456,9 +456,9 @@ class WhatsappWebClient {
         const animes = new Animes();
         const anime = await animes.getAnimeData(animeName, type);
 
-        if(!anime.error) {
+        if(anime.error == false) {
             var animeSummary = anime.data;
-            console.log(animeSummary);
+            
             if(animeSummary.image) {
                 const media = await MessageMedia.fromUrl(animeSummary.image);
     
