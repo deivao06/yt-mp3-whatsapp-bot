@@ -1,4 +1,5 @@
 const axios = require('axios');
+const { translate } = require('free-translate');
 
 class Animes {
     constructor() {
