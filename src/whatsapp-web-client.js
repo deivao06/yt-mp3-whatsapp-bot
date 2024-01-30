@@ -499,16 +499,17 @@ class WhatsappWebClient {
             var text = "";
 
             charts.forEach((chart) => {
-                text += `*Nome:* ${chart.name}\n\n`;
-                text += `*Artista:* ${chart.artist}\n\n`;
+                text += `*Nome:* ${chart.name}\n`;
+                text += `*Artista:* ${chart.artist}\n`;
                 text += `*Album:* ${chart.album}\n`;
                 text += `*Ano:* ${chart.year}\n`;
                 text += `*Charter:* ${chart.charter}\n`;
                 text += `*Url:* ${chart.url}\n`;
-                text += `*Download:* ${chart.download_url}\n\n`;
+                text += `*Download:* ${chart.download_url}`;
             });
 
-            await chat.sendMessage(text);
+            const media = await MessageMedia.fromUrl(chart.image);
+            await chat.sendMessage(text, {media: media});
             return;
         } else {
             await message.reply(response.message);

@@ -4,7 +4,8 @@ class Encore {
     constructor() {
         this.api_url = 'https://api.enchor.us';
         this.chart_url = 'https://enchor.us';
-        this.response_limit = 3;
+        this.image_url = 'https://files.enchor.us';
+        this.response_limit = 1;
     }
 
     async getCharts(musicName) {
@@ -28,6 +29,7 @@ class Encore {
                         charter: chart.charter || '',
                         url: `${this.chart_url}/?hash=${chart.md5}`,
                         download_url: `${this.chart_url}/download?md5=${chart.md5}&isSng=false&filename=${chart.artist} - ${chart.name} (${chart.charter})`,
+                        image: `${this.image_url}/${chart.albumArtMd5}.jpg`
                     }
 
                     formatedData.push(data);
