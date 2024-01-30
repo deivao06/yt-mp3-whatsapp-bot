@@ -25,7 +25,7 @@ class Encore {
                         name: chart.name || '',
                         artist: chart.artist || '',
                         album: chart.album || '',
-                        year: chart.album || '',
+                        year: chart.year || '',
                         charter: chart.charter || '',
                         url: `${this.chart_url}/?hash=${chart.md5}`,
                         download_url: `${this.chart_url}/download?md5=${chart.md5}&isSng=false&filename=${chart.artist} - ${chart.name} (${chart.charter})`,
