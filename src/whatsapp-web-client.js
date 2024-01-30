@@ -494,22 +494,21 @@ class WhatsappWebClient {
         const response = await encore.getCharts(musicName);
 
         if(response.error == false) {
-            var charts = response.data;
+            var chart = response.data;
 
             var text = "";
 
-            charts.forEach((chart) => {
-                text += `*Nome:* ${chart.name}\n`;
-                text += `*Artista:* ${chart.artist}\n`;
-                text += `*Album:* ${chart.album}\n`;
-                text += `*Ano:* ${chart.year}\n`;
-                text += `*Charter:* ${chart.charter}\n`;
-                text += `*Url:* ${encodeURI(chart.url)}\n`;
-                text += `*Download:* ${encodeURI(chart.download_url)}`;
-            });
+            text += `*Nome:* ${chart.name}\n`;
+            text += `*Artista:* ${chart.artist}\n`;
+            text += `*Album:* ${chart.album}\n`;
+            text += `*Ano:* ${chart.year}\n`;
+            text += `*Charter:* ${chart.charter}\n`;
+            text += `*Url:* ${encodeURI(chart.url)}\n`;
+            text += `*Download:* ${encodeURI(chart.download_url)}`;
 
             const media = await MessageMedia.fromUrl(chart.image);
             await chat.sendMessage(text, {media: media});
+            
             return;
         } else {
             await message.reply(response.message);

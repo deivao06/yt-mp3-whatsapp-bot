@@ -44,7 +44,7 @@ class Encore {
 
         return {
             error: false,
-            data: formatedData
+            data: formatedData[0]
         }
     }
 }
