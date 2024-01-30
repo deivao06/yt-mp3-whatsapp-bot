@@ -504,8 +504,8 @@ class WhatsappWebClient {
                 text += `*Album:* ${chart.album}\n`;
                 text += `*Ano:* ${chart.year}\n`;
                 text += `*Charter:* ${chart.charter}\n`;
-                text += `*Url:* ${chart.url}\n`;
-                text += `*Download:* ${chart.download_url}`;
+                text += `*Url:* ${encodeURI(chart.url)}\n`;
+                text += `*Download:* ${encodeURI(chart.download_url)}`;
             });
 
             const media = await MessageMedia.fromUrl(chart.image);
