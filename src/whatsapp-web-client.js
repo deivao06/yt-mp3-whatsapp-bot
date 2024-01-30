@@ -12,6 +12,7 @@ const SteamGames = require('./Modules/steam-games.js');
 const Meme = require('./Modules/meme-api.js');
 const MonsterHunterWorldApi = require('./Modules/monster-hunter-world.js');
 const Animes = require('./Modules/animes.js');
+const Encore = require('./Modules/encore.js');
 
 class WhatsappWebClient {
     constructor() {
