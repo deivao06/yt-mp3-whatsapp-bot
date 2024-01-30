@@ -7,6 +7,7 @@ const Waifu = require('./src/Modules/waifu.js');
 const Notequest = require('./src/Modules/notequest.js');
 const SteamGames = require('./src/Modules/steam-games.js');
 const Animes = require('./src/Modules/animes.js');
+const Encore = require('./src/Modules/encore.js');
 
 router.get('/youtube-music-downloader', async (request, response) => {
     const videoNameOrUrl = request.query.message;
@@ -73,6 +74,14 @@ router.get('/anime', async (request, response) => {
     const anime = await animes.getAnimeData(animeName, 'tv');
 
     response.status(200).json(anime);
+})
+
+router.get('/encore', async (request, response) => {
+    var musicName = request.query.message;
+    const encore = new Encore();
+    const chart = await encore.getCharts(musicName);
+
+    response.status(200).json(chart);
 })
 
 module.exports = router;

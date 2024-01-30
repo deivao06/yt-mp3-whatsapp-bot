@@ -472,6 +472,46 @@ class WhatsappWebClient {
             await message.reply(anime.message);
         }
     }
+
+    async getChartByName(message) {
+        const chat = await message.getChat();
+        const contact = await message.getContact();
+
+        console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+
+        var commandSplit = message.body.split(" ");
+        commandSplit.shift();
+        var musicName = commandSplit.join(" ");
+
+        if(!musicName) {
+            await message.reply("Nome da musica é obrigatório.");
+            return;
+        }
+
+        const encore = new Encore();
+        const response = await encore.getCharts(musicName);
+
+        if(response.error == false) {
+            var charts = response.data;
+
+            var text = "";
+
+            charts.forEach((chart) => {
+                text += `*Nome:* ${chart.name}\n\n`;
+                text += `*Artista:* ${chart.artist}\n\n`;
+                text += `*Album:* ${chart.album}\n`;
+                text += `*Ano:* ${chart.year}\n`;
+                text += `*Charter:* ${chart.charter}\n`;
+                text += `*Url:* ${chart.url}\n`;
+                text += `*Download:* ${chart.download_url}\n\n`;
+            });
+
+            await chat.sendMessage(text);
+            return;
+        } else {
+            await message.reply(response.message);
+        }
+    }
 }
 
 module.exports = WhatsappWebClient

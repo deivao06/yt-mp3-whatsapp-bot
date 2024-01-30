@@ -7,7 +7,7 @@ class Animes {
     }
 
     async getAnimeData(animeName, type) {
-        const response = await axios.get(`https://api.jikan.moe/v4/anime?q=${animeName}&nsfw&type=${type}`);
+        const response = await axios.get(`${this.api_url}/anime?q=${animeName}&nsfw&type=${type}`);
 
         if(response.data.data.length > 0) {
             var anime = response.data.data[0];
