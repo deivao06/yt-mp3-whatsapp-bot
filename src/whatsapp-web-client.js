@@ -31,7 +31,7 @@ class WhatsappWebClient {
             { "mhw": async (message) => { return this.getMonsterHunterWorldInfo(message) }},
             { "anime": async (message) => { return this.getAnimeDataByName(message, 'tv') }},
             { "encore": async (message) => { return this.getChartByName(message) }},
-            { "reddit": async (message) => { return this.getRedditUrlContent(message) }},
+            // { "reddit": async (message) => { return this.getRedditUrlContent(message) }},
         ];
 
         this.wwebClient = new Client({
@@ -537,7 +537,7 @@ class WhatsappWebClient {
 
         const media = await MessageMedia.fromUrl(contentUrl);
 
-        await message.reply(media);
+        await chat.sendMessage(media);
 
         return;
     }
