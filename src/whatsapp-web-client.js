@@ -13,6 +13,7 @@ const Meme = require('./Modules/meme-api.js');
 const MonsterHunterWorldApi = require('./Modules/monster-hunter-world.js');
 const Animes = require('./Modules/animes.js');
 const Encore = require('./Modules/encore.js');
+const Reddit = require('./Modules/reddit.js');
 
 class WhatsappWebClient {
     constructor() {
@@ -30,6 +31,7 @@ class WhatsappWebClient {
             { "mhw": async (message) => { return this.getMonsterHunterWorldInfo(message) }},
             { "anime": async (message) => { return this.getAnimeDataByName(message, 'tv') }},
             { "encore": async (message) => { return this.getChartByName(message) }},
+            { "reddit": async (message) => { return this.getRedditUrlContent(message) }},
         ];
 
         this.wwebClient = new Client({
@@ -513,6 +515,31 @@ class WhatsappWebClient {
         } else {
             await message.reply(response.message);
         }
+    }
+
+    async getRedditUrlContent(message) {
+        const chat = await message.getChat();
+        const contact = await message.getContact();
+
+        console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+
+        var commandSplit = message.body.split(" ");
+        commandSplit.shift();
+        var redditUrl = commandSplit.join(" ");
+
+        if(!redditUrl) {
+            await message.reply("Link é obrigatório.");
+            return;
+        }
+
+        const reddit = new Reddit();
+        const contentUrl = await reddit.getPostMediaUrl(redditUrl);
+
+        const media = await MessageMedia.fromUrl(contentUrl);
+
+        await message.reply(media);
+
+        return;
     }
 }
 

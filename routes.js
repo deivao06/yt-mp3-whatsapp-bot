@@ -8,6 +8,7 @@ const Notequest = require('./src/Modules/notequest.js');
 const SteamGames = require('./src/Modules/steam-games.js');
 const Animes = require('./src/Modules/animes.js');
 const Encore = require('./src/Modules/encore.js');
+const Reddit = require('./src/Modules/reddit.js');
 
 router.get('/youtube-music-downloader', async (request, response) => {
     const videoNameOrUrl = request.query.message;
@@ -82,6 +83,13 @@ router.get('/encore', async (request, response) => {
     const chart = await encore.getCharts(musicName);
 
     response.status(200).json(chart);
+})
+
+router.get('/teste', async (request, response) => {
+    const reddit = new Reddit();
+    const mediaUrl = await reddit.getPostMediaUrl(`https://www.reddit.com/r/videogames/s/jdV2GThluT`);
+
+    response.status(200).json(mediaUrl);
 })
 
 module.exports = router;
