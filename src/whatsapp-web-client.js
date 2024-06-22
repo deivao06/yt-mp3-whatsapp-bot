@@ -35,10 +35,6 @@ class WhatsappWebClient {
         ];
 
         this.wwebClient = new Client({
-            webVersionCache: {
-                remotePath: 'https://raw.githubusercontent.com/wppconnect-team/wa-version/main/html/2.2402.5-beta.html',
-                type: 'remote' 
-            },
             authStrategy: new LocalAuth(),
             ffmpegPath: ffmpeg,
             puppeteer: {
