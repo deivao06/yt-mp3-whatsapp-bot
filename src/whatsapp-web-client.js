@@ -14,6 +14,7 @@ const MonsterHunterWorldApi = require('./Modules/monster-hunter-world.js');
 const Animes = require('./Modules/animes.js');
 const Encore = require('./Modules/encore.js');
 const Reddit = require('./Modules/reddit.js');
+const Tibia = require('./Modules/tibia.js');
 
 class WhatsappWebClient {
     constructor() {
@@ -31,6 +32,7 @@ class WhatsappWebClient {
             { "mhw": async (message) => { return this.getMonsterHunterWorldInfo(message) }},
             { "anime": async (message) => { return this.getAnimeDataByName(message, 'tv') }},
             { "encore": async (message) => { return this.getChartByName(message) }},
+            { "tibia-player": async (message) => { return this.getPlayerByName(message) }},
             // { "reddit": async (message) => { return this.getRedditUrlContent(message) }},
         ];
 
@@ -540,6 +542,42 @@ class WhatsappWebClient {
         await chat.sendMessage(media);
 
         return;
+    }
+
+    async getPlayerByName(message) {
+        const chat = await message.getChat();
+        const contact = await message.getContact();
+
+        console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+
+        var commandSplit = message.body.split(" ");
+        commandSplit.shift();
+        var name = commandSplit.join(" ");
+
+        if(!name) {
+            await message.reply("Nome do jogador é obrigatório.");
+            return;
+        }
+
+        const tibia = new Tibia()
+        const player = await tibia.getPlayerByName(name);
+
+        if (player.error) {
+            await chat.sendMessage(player.error)
+            return;
+        }
+
+        var text = "";
+        text += `*${player.data.name}*\n\n`;
+
+        text += `*Level:* ${player.data.level}\n`;
+        text += `*Gender:* ${player.data.sex}\n`;
+        text += `*Residence:* ${player.data.residence}\n`;
+        text += `*Guild Name:* ${player.data.guild_name}\n`;
+        text += `*Guild Rank:* ${player.data.guild_rank}\n`;
+        text += `*Last Login:* ${player.data.last_login}`;
+
+        await chat.sendMessage(text);
     }
 }
 
