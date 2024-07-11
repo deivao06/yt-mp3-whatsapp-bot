@@ -25,7 +25,7 @@ class WhatsappWebClient {
             { "everyone": async (message) => { return await this.mentionEveryone(message) }},
             { "roll": async (message) => { return await this.rollDice(message) }},
             { "sticker": async (message) => { return this.imageToGif(message) }},
-            // { "waifu": async (message) => { return this.waifu(message) }},
+            { "waifu": async (message) => { return this.waifu(message) }},
             { "notequest": async (message) => { return this.notequest(message) }},
             { "steam": async (message) => { return this.getSteamGameInfo(message) }},
             { "meme": async (message) => { return this.getMeme(message) }},
@@ -211,25 +211,25 @@ class WhatsappWebClient {
         }
     }
 
-    // async waifu(message) {
-    //     const chat = await message.getChat();
-    //     const contact = await message.getContact();
+    async waifu(message) {
+        const chat = await message.getChat();
+        const contact = await message.getContact();
     
-    //     console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+        console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
     
-    //     var commandSplit = message.body.split(" ");
-    //     commandSplit.shift();
-    //     var nsfw = commandSplit.join(" ");
+        var commandSplit = message.body.split(" ");
+        commandSplit.shift();
+        var nsfw = commandSplit.join(" ");
 
-    //     const waifu = new Waifu();
-    //     const media = await MessageMedia.fromUrl(await waifu.getWaifu(nsfw));
+        const waifu = new Waifu();
+        const media = await MessageMedia.fromUrl(await waifu.getWaifu(nsfw));
     
-    //     if(nsfw == 'nsfw') {
-    //         await chat.sendMessage(media, {isViewOnce: true});
-    //     } else {
-    //         await chat.sendMessage(media, {sendMediaAsSticker: true, stickerAuthor: "Sticker", stickerName: "Sticker", stickerCategories: []});
-    //     }
-    // }
+        if(nsfw == 'nsfw') {
+            await chat.sendMessage(media, {isViewOnce: true});
+        } else {
+            await chat.sendMessage(media, {sendMediaAsSticker: true, stickerAuthor: "Sticker", stickerName: "Sticker", stickerCategories: []});
+        }
+    }
 
     async getMeme(message) {
         const chat = await message.getChat();
