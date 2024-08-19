@@ -93,12 +93,12 @@ router.get('/teste', async (request, response) => {
     response.status(200).json(mediaUrl);
 })
 
-router.get('/rotmg', async (request, response) => {
+router.get('/rotmg/guild/:name', async (request, response) => {
     const rotmg = new Rotmg();
     
     try {
-        const html = await rotmg.getGuildMembers('DST');
-        response.status(200).send(html);
+        const players = await rotmg.getGuildMembers(request.params.name);
+        response.status(200).json(players);
     } catch (error) {
         response.status(error.statusCode).json({message: error.message});
     }

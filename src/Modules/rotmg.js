@@ -18,6 +18,11 @@ class Rotmg {
 
         if (response.status == 200) {
             const html = response.data;
+            
+            if (html.indexOf("Sorry, ") !== -1) {
+                return { message: 'Guild not found' }
+            }
+
             const $ = cheerio.load(html);
 
             var players = [];
