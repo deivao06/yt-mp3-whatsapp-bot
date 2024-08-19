@@ -9,6 +9,7 @@ const SteamGames = require('./src/Modules/steam-games.js');
 const Animes = require('./src/Modules/animes.js');
 const Encore = require('./src/Modules/encore.js');
 const Reddit = require('./src/Modules/reddit.js');
+const Rotmg = require('./src/Modules/rotmg.js');
 
 router.get('/youtube-music-downloader', async (request, response) => {
     const videoNameOrUrl = request.query.message;
@@ -90,6 +91,17 @@ router.get('/teste', async (request, response) => {
     const mediaUrl = await reddit.getPostMediaUrl(`https://www.reddit.com/r/videogames/s/jdV2GThluT`);
 
     response.status(200).json(mediaUrl);
+})
+
+router.get('/rotmg', async (request, response) => {
+    const rotmg = new Rotmg();
+    
+    try {
+        const html = await rotmg.getGuildMembers('DST');
+        response.status(200).send(html);
+    } catch (error) {
+        response.status(error.statusCode).json({message: error.message});
+    }
 })
 
 module.exports = router;
