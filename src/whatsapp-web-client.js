@@ -609,7 +609,7 @@ class WhatsappWebClient {
             text += `*Rank:* ${player.info.rank}\n`;
             text += `*Guild:* ${player.info.guild}\n`;
             text += `*Cargo:* ${player.info.guild_rank}\n`;
-            text += `*Visto por último: ${player.info.last_seen}*\n`;
+            text += `*Visto por último: ${player.info.last_seen == 'hidden' ? player.info.last_seen : this.formatDate(player.info.last_seen)}*\n`;
             text += `*Descrição:* ${player.info.description}\n\n`;
 
             text += `*Personagens*\n`;
@@ -630,7 +630,7 @@ class WhatsappWebClient {
             text += `*Ultima morte*\n`;
             text += `*---------------------------------*\n`;
             if(Object.keys(player.graveyard).length > 0) {
-                text += `*Morto em: ${player.graveyard[0].died_on}*\n`;
+                text += `*Morto em: ${this.formatDate(player.graveyard[0].died_on)}*\n`;
                 text += `*Classe:* ${player.graveyard[0].class}\n`;
                 text += `*Level:* ${player.graveyard[0].level}\n`;
                 text += `*Stats:* ${player.graveyard[0].stats}\n`;
@@ -644,6 +644,14 @@ class WhatsappWebClient {
             console.log(e.message);
             await message.reply('Erro ao pegar dados do jogador');
         }
+    }
+
+    formatDate(date) {
+        var data = new Date(date);
+        var config = {
+            timezone: 'America/Sao_Paulo'
+        };
+        return data.toLocaleString('pt-BR', config);
     }
 }
 
