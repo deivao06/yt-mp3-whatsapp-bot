@@ -117,7 +117,7 @@ class Rotmg {
                         player.info.account_fame = $(element).find('td').eq(1).find('span').text();
                         break;
                     case 'Guild':
-                        player.info.guild = $(element).find('td').eq(1).text();
+                        player.info.guild = $(element).find('td').eq(1).text().trim();
                         break;
                     case 'Guild Rank':
                         player.info.guild_rank = $(element).find('td').eq(1).text();
@@ -138,7 +138,9 @@ class Rotmg {
             crawler = $('.table.table-striped.tablesorter').eq(0).find('tbody > tr');
             
             crawler.each((index, element) => {
-                var equipmentsCrawler = $(element).find('td').eq(5).find('a');
+                var hasPet = $(element).find('td').length == 8 ? true : false;
+                var sumPetIndex = hasPet ? 1 : 0;
+                var equipmentsCrawler = $(element).find('td').eq(5 + sumPetIndex).find('a');
                 var equipments = [];
 
                 equipmentsCrawler.each((index, equipment) => {
@@ -148,20 +150,20 @@ class Rotmg {
                     });
                 });
 
-                var statsCrawler = $(element).find('td').eq(6);
+                var statsCrawler = $(element).find('td').eq(6 + sumPetIndex);
                 var keys = ['hp', 'mp', 'att', 'def', 'spd', 'vit', 'wis', 'dex'];
-                var baseStatusArray = JSON.parse(statsCrawler.find('span').eq(0).attr('data-stats'));
-                var baseStats = baseStatusArray.reduce((obj, value, index) => {
+                var baseStatsArray = JSON.parse(statsCrawler.find('span').eq(0).attr('data-stats'));
+                var baseStats = baseStatsArray.reduce((obj, value, index) => {
                     obj[keys[index]] = value;
                     return obj;
                 }, {});
 
                 player.characters.push({
-                    href: 'https://www.realmeye.com' + $(element).find('td').eq(0).find('a').eq(0).attr('href'),
-                    class: $(element).find('td').eq(1).text(),
-                    level: $(element).find('td').eq(2).text(),
-                    fame: $(element).find('td').eq(3).text(),
-                    place: $(element).find('td').eq(4).text(),
+                    href: 'https://www.realmeye.com' + $(element).find('td').eq(0 + sumPetIndex).find('a').eq(0).attr('href'),
+                    class: $(element).find('td').eq(1 + sumPetIndex).text(),
+                    level: $(element).find('td').eq(2 + sumPetIndex).text(),
+                    fame: $(element).find('td').eq(3 + sumPetIndex).text(),
+                    place: $(element).find('td').eq(4 + sumPetIndex).text(),
                     equipments: equipments,
                     stats: statsCrawler.text().trim(),
                     base_stats: baseStats,
@@ -237,8 +239,8 @@ class Rotmg {
 
             var statsCrawler = $(element).find('td').eq(8);
             var keys = ['hp', 'mp', 'att', 'def', 'spd', 'vit', 'wis', 'dex'];
-            var baseStatusArray = JSON.parse(statsCrawler.find('span').eq(0).attr('data-stats'));
-            var baseStats = baseStatusArray.reduce((obj, value, index) => {
+            var baseStatsArray = JSON.parse(statsCrawler.find('span').eq(0).attr('data-stats'));
+            var baseStats = baseStatsArray.reduce((obj, value, index) => {
                 obj[keys[index]] = value;
                 return obj;
             }, {});
