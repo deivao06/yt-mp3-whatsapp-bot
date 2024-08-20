@@ -14,7 +14,7 @@ const MonsterHunterWorldApi = require('./Modules/monster-hunter-world.js');
 const Animes = require('./Modules/animes.js');
 const Encore = require('./Modules/encore.js');
 const Tibia = require('./Modules/tibia.js');
-const Rotmg = require('./Modules/rotmg.js');
+const Rotmg = require('./Modules/rotmg/rotmg.js');
 
 class WhatsappWebClient {
     constructor() {
@@ -46,7 +46,9 @@ class WhatsappWebClient {
 
         this.wwebClient.on('qr', qr => { qrcode.generate(qr, {small: true}); });
         this.wwebClient.on('auth_failure', message => { console.log(message) });
-        this.wwebClient.on('ready', () => { console.log('Whatsapp web client is ready! \n'); });
+        this.wwebClient.on('ready', async () => { 
+            console.log('Whatsapp web client is ready! \n'); 
+        });
         this.wwebClient.on('message_create', async (message) => { await this.handleMessage(message); });
         this.wwebClient.initialize();
     }
@@ -641,8 +643,7 @@ class WhatsappWebClient {
 
             await chat.sendMessage(text);
         } catch (e) {
-            console.log(e.message);
-            await message.reply('Erro ao pegar dados do jogador');
+            await message.reply(e.message);
         }
     }
 
