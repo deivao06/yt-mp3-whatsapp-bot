@@ -83,7 +83,9 @@ class Rotmg {
         const html = await this.page.content();
 
         if (html.includes("Sorry, ")) {
-            return { message: 'Player not found' };
+            const error = Error("Player not found");
+            error.statusCode = 404;
+            throw error;
         }
 
         const $ = cheerio.load(html);
