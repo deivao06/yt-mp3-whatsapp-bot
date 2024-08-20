@@ -14,6 +14,7 @@ const MonsterHunterWorldApi = require('./Modules/monster-hunter-world.js');
 const Animes = require('./Modules/animes.js');
 const Encore = require('./Modules/encore.js');
 const Tibia = require('./Modules/tibia.js');
+const Rotmg = require('./Modules/rotmg.js');
 
 class WhatsappWebClient {
     constructor() {
@@ -31,6 +32,7 @@ class WhatsappWebClient {
             { "anime": async (message) => { return this.getAnimeDataByName(message, 'tv') }},
             { "encore": async (message) => { return this.getChartByName(message) }},
             { "tibia-player": async (message) => { return this.getPlayerByName(message) }},
+            { "rotmg-player": async (message) => { return this.getRotmgPlayer(message) }}
         ];
 
         this.wwebClient = new Client({
@@ -575,6 +577,81 @@ class WhatsappWebClient {
         text += `*Last Login:* ${player.data.last_login}`;
 
         await chat.sendMessage(text);
+    }
+
+    async getRotmgPlayer(message) {
+        const chat = await message.getChat();
+        const contact = await message.getContact();
+
+        console.log(`${contact.id.user} | ${chat.name} | ${message.body}`);
+
+        var commandSplit = message.body.split(" ");
+        commandSplit.shift();
+        var name = commandSplit.join(" ");
+
+        if(!name) {
+            await message.reply("Nome do jogador é obrigatório.");
+            return;
+        }
+
+        const rotmg = new Rotmg();
+
+        try {
+            const player = await rotmg.getPlayer(name);
+
+            var text = "*Info*\n";
+            text += `*---------------------------------*\n`;
+            text += `*Nome:* ${player.info.name}\n`;
+            text += `*Personagens:* ${player.info.characters}\n`;
+            text += `*Skins:* ${player.info.skins}\n`;
+            text += `*Exaltations:* ${player.info.exaltations}\n`;
+            text += `*Fama:* ${player.info.fame}\n`;
+            text += `*Rank:* ${player.info.rank}\n`;
+            text += `*Guild:* ${player.info.guild}\n`;
+            text += `*Cargo:* ${player.info.guild_rank}\n`;
+            text += `*Visto por último: ${player.info.last_seen == 'hidden' ? player.info.last_seen : this.formatDate(player.info.last_seen)}*\n`;
+            text += `*Descrição:* ${player.info.description}\n\n`;
+
+            text += `*Personagens*\n`;
+            text += `*---------------------------------*\n`;
+            if(Object.keys(player.characters).length > 0) {
+                for(const key in player.characters) {
+                    var character = player.characters[key];
+
+                    text += `*Classe:* ${character.class}\n`;
+                    text += `*Level:* ${character.level}\n`;
+                    text += `*Fama:* ${character.fame}\n`;
+                    text += `*Stats:* ${character.stats}\n\n`;
+                }
+            } else {
+                text += "-none\n";
+            }
+
+            text += `*Ultima morte*\n`;
+            text += `*---------------------------------*\n`;
+            if(Object.keys(player.graveyard).length > 0) {
+                text += `*Morto em: ${this.formatDate(player.graveyard[0].died_on)}*\n`;
+                text += `*Classe:* ${player.graveyard[0].class}\n`;
+                text += `*Level:* ${player.graveyard[0].level}\n`;
+                text += `*Stats:* ${player.graveyard[0].stats}\n`;
+                text += `*Morto por:* ${player.graveyard[0].killed_by}\n`;
+            } else {
+                text += "-none\n";
+            }
+
+            await chat.sendMessage(text);
+        } catch (e) {
+            console.log(e.message);
+            await message.reply('Erro ao pegar dados do jogador');
+        }
+    }
+
+    formatDate(date) {
+        var data = new Date(date);
+        var config = {
+            timezone: 'America/Sao_Paulo'
+        };
+        return data.toLocaleString('pt-BR', config);
     }
 }
 
