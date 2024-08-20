@@ -9,7 +9,7 @@ const SteamGames = require('./src/Modules/steam-games.js');
 const Animes = require('./src/Modules/animes.js');
 const Encore = require('./src/Modules/encore.js');
 const Reddit = require('./src/Modules/reddit.js');
-const Rotmg = require('./src/Modules/rotmg.js');
+const Rotmg = require('./src/Modules/rotmg/rotmg.js');
 
 router.get('/youtube-music-downloader', async (request, response) => {
     const videoNameOrUrl = request.query.message;

@@ -20,6 +20,7 @@
     "ffmpeg-static": "^5.2.0",
     "fluent-ffmpeg": "^2.1.2",
     "free-translate": "^0.6.1",
+    "image-data-uri": "^2.0.1",
     "moment": "^2.30.1",
     "puppeteer": "^23.1.0",
     "qrcode-terminal": "^0.12.0",

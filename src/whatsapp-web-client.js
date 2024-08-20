@@ -3,6 +3,8 @@ const qrcode = require('qrcode-terminal');
 const { Client , LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const ffmpeg = require('ffmpeg-static');
 const chromiumBinary = require('chromium');
+const imageDataUri = require('image-data-uri');
+const moment = require('moment');
 
 const YoutubeMusicDownloader = require('./Modules/youtube-music-downloader.js');
 const DiceRoller = require('./Modules/dice-roller.js');
@@ -206,7 +208,7 @@ class WhatsappWebClient {
         
         if(message.hasMedia) {
             const media = await message.downloadMedia();
-            await chat.sendMessage(media, {sendMediaAsSticker: true, stickerAuthor: "Sticker", stickerName: "Sticker", stickerCategories: []});
+            await chat.sendMessage(media, {sendMediaAsSticker: true, stickerAuthor: "Bot", stickerName: "Bot", stickerCategories: []});
         } else {
             message.reply("Tem que mandar uma imagem junto com a mensagem");
         }
@@ -228,7 +230,7 @@ class WhatsappWebClient {
         if(nsfw == 'nsfw') {
             await chat.sendMessage(media, {isViewOnce: true});
         } else {
-            await chat.sendMessage(media, {sendMediaAsSticker: true, stickerAuthor: "Sticker", stickerName: "Sticker", stickerCategories: []});
+            await chat.sendMessage(media, {sendMediaAsSticker: true, stickerAuthor: "Bot", stickerName: "Bot", stickerCategories: []});
         }
     }
 
@@ -597,9 +599,15 @@ class WhatsappWebClient {
         }
 
         const rotmg = new Rotmg();
+        var imagePath = '';
+
+        await message.reply('Buscando informações...');
 
         try {
             const player = await rotmg.getPlayer(name);
+            const path = './Files/player-image.png';
+            imagePath = await imageDataUri.outputFile(player.info.characters_image_url, path);
+            const media = await MessageMedia.fromFilePath(imagePath, {unsafeMime: true});
 
             var text = "*Info*\n";
             text += `*---------------------------------*\n`;
@@ -611,7 +619,7 @@ class WhatsappWebClient {
             text += `*Rank:* ${player.info.rank}\n`;
             text += `*Guild:* ${player.info.guild}\n`;
             text += `*Cargo:* ${player.info.guild_rank}\n`;
-            text += `*Visto por último: ${player.info.last_seen == 'hidden' ? player.info.last_seen : this.formatDate(player.info.last_seen)}*\n`;
+            text += `*Visto por último:* ${player.info.last_seen}\n`;
             text += `*Descrição:* ${player.info.description}\n\n`;
 
             text += `*Personagens*\n`;
@@ -629,10 +637,10 @@ class WhatsappWebClient {
                 text += "-none\n";
             }
 
-            text += `*Ultima morte*\n`;
+            text += `*Última morte*\n`;
             text += `*---------------------------------*\n`;
             if(Object.keys(player.graveyard).length > 0) {
-                text += `*Morto em: ${this.formatDate(player.graveyard[0].died_on)}*\n`;
+                text += `*Morto em:* ${moment(player.graveyard[0].died_on).format('DD/MM/YYYY, HH:mm')}\n`;
                 text += `*Classe:* ${player.graveyard[0].class}\n`;
                 text += `*Level:* ${player.graveyard[0].level}\n`;
                 text += `*Stats:* ${player.graveyard[0].stats}\n`;
@@ -641,18 +649,12 @@ class WhatsappWebClient {
                 text += "-none\n";
             }
 
-            await chat.sendMessage(text);
+            await chat.sendMessage(text, {media: media});
+            fs.unlinkSync(imagePath);
         } catch (e) {
-            await message.reply(e.message);
+            await chat.sendMessage(e.message);
+            fs.unlinkSync(imagePath);
         }
-    }
-
-    formatDate(date) {
-        var data = new Date(date);
-        var config = {
-            timezone: 'America/Sao_Paulo'
-        };
-        return data.toLocaleString('pt-BR', config);
     }
 }
 
