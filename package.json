@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@distube/ytdl-core": "^4.14.4",
     "axios": "^1.4.0",
     "cheerio": "^1.0.0",
     "chromium": "^3.0.3",
@@ -25,7 +26,6 @@
     "sqlite3": "^5.1.6",
     "usetube": "^2.2.7",
     "whatsapp-web.js": "github:pedroslopez/whatsapp-web.js#webpack-exodus",
-    "ytdl-core": "^4.11.5",
     "ytdl-mp3": "^3.1.0",
     "ytsr": "^3.8.2"
   }

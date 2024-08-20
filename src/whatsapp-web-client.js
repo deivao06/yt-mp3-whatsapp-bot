@@ -13,7 +13,6 @@ const Meme = require('./Modules/meme-api.js');
 const MonsterHunterWorldApi = require('./Modules/monster-hunter-world.js');
 const Animes = require('./Modules/animes.js');
 const Encore = require('./Modules/encore.js');
-const Reddit = require('./Modules/reddit.js');
 const Tibia = require('./Modules/tibia.js');
 
 class WhatsappWebClient {
@@ -21,7 +20,6 @@ class WhatsappWebClient {
         this.prefixes = ["!", "-"];
         this.commands = [
             { "p": async (message) => { return await this.youtubeMusicDownloader(message) }},
-            // { "youtube": async (message) => { return await this.youtubeVideoDownloader(message) }},
             { "everyone": async (message) => { return await this.mentionEveryone(message) }},
             { "roll": async (message) => { return await this.rollDice(message) }},
             { "sticker": async (message) => { return this.imageToGif(message) }},
@@ -33,7 +31,6 @@ class WhatsappWebClient {
             { "anime": async (message) => { return this.getAnimeDataByName(message, 'tv') }},
             { "encore": async (message) => { return this.getChartByName(message) }},
             { "tibia-player": async (message) => { return this.getPlayerByName(message) }},
-            // { "reddit": async (message) => { return this.getRedditUrlContent(message) }},
         ];
 
         this.wwebClient = new Client({
