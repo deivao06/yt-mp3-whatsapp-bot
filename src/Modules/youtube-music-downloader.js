@@ -1,5 +1,5 @@
 const usetube = require('usetube');
-const ytdl = require('ytdl-core');
+const ytdl = require("@distube/ytdl-core");
 const cp = require('child_process');
 const path = require('path');
 const ffmpeg = require('ffmpeg-static');
