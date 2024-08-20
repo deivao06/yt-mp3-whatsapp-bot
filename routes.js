@@ -106,13 +106,9 @@ router.get('/rotmg/guild/:name', async (request, response) => {
 
 router.get('/rotmg/player/:name', async (request, response) => {
     const rotmg = new Rotmg();
-    
-    try {
-        const player = await rotmg.getPlayer(request.params.name);
-        response.status(200).json(player);
-    } catch (error) {
-        response.status(error.statusCode).json({message: error.message});
-    }
+    const player = await rotmg.getPlayer(request.params.name);
+
+    response.status(200).json(player);
 })
 
 module.exports = router;
