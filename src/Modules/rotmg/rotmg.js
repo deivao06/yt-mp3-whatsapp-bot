@@ -2,6 +2,8 @@ const axios = require("axios");
 const cheerio = require('cheerio');
 const moment = require('moment');
 const puppeteer = require('puppeteer');
+const path = require('path');
+const fs = require('fs');
 
 class Rotmg {
     constructor () {
@@ -25,6 +27,7 @@ class Rotmg {
         };
         this.playerGraveyard = [];
         this.page = null;
+        this.browser = null;
     }
 
     async getGuildMembers(name) {
@@ -47,18 +50,21 @@ class Rotmg {
             var crawler = $('#e > tbody > tr');
 
             crawler.each((index, element) => {
-                const lastSeen = $(element).find('td').eq(5).text().trim();
-                const server = $(element).find('td').eq(6).text().trim();
+                var skipFirst = $(element).find('td').length == 9 ? true : false;
+                var sumIndex = skipFirst ? 1 : 0;
+
+                const lastSeen = $(element).find('td').eq(5 + sumIndex).text().trim();
+                const server = $(element).find('td').eq(6 + sumIndex).text().trim();
 
                 players.push({
-                    name: $(element).find('td').eq(0).text(),
-                    guild_rank: $(element).find('td').eq(1).text(),
-                    fame: $(element).find('td').eq(2).text(),
-                    rank: $(element).find('td').eq(3).text(),
-                    characters: $(element).find('td').eq(4).text(),
+                    name: $(element).find('td').eq(0 + sumIndex).text(),
+                    guild_rank: $(element).find('td').eq(1 + sumIndex).text(),
+                    fame: $(element).find('td').eq(2 + sumIndex).text(),
+                    rank: $(element).find('td').eq(3 + sumIndex).text(),
+                    characters: $(element).find('td').eq(4 + sumIndex).text(),
                     last_seen: lastSeen.length > 0 ? lastSeen : null,
                     server: server.length > 0 ? server : null,
-                    avg_fame_char: $(element).find('td').eq(7).text(),
+                    avg_fame_char: $(element).find('td').eq(7 + sumIndex).text(),
                 });
             });
 
@@ -70,14 +76,19 @@ class Rotmg {
         throw error;
     }
 
-    async getPlayer(name) {
-        const browser = await puppeteer.launch({
+    async createPuppeteerBrowser()
+    {
+        this.browser = await puppeteer.launch({
             headless: true, 
             args: ['--no-sandbox', '--disable-dev-shm-usage']
         });
     
-        this.page = await browser.newPage();
+        this.page = await this.browser.newPage();
         await this.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36");
+    }
+
+    async getPlayer(name) {
+        await this.createPuppeteerBrowser();
         await this.page.goto("https://www.realmeye.com/player/" + name, { waitUntil: 'networkidle2' });
 
         const html = await this.page.content();
@@ -138,7 +149,7 @@ class Rotmg {
                 case 'Guild Rank':
                     player.info.guild_rank = $(element).find('td').eq(1).text();
                     break;
-                case 'Created':
+                case 'First seen':
                     player.info.created = $(element).find('td').eq(1).text();
                     break;
                 case 'Last seen':
@@ -283,6 +294,117 @@ class Rotmg {
                 killed_by: $(element).find('td').eq(9).text(),
             });
         });
+    }
+
+    async getPlayerGraveyardTotalDeaths(name) {
+        var page = 1;
+        const html = await this.getPlayerGraveyardPage(name, page);
+        
+        const $ = cheerio.load(html);
+
+        return $('.col-md-12').eq(0).find('p').eq(1).find('strong').text();
+    }
+
+    async fillGraveyardTrackerPlayers() {
+        const filePath = path.join(__dirname, 'graveyard-tracker.json');
+        const data = await fs.promises.readFile(filePath, 'utf-8');
+        const graveyardTracker = JSON.parse(data);
+
+        var players = [];
+
+        for (const item of graveyardTracker['rotmg-guild']) {
+            console.log('Collecting guild members from ' + item);
+
+            var guildMembers = await this.getGuildMembers(item);
+
+            for (const player of guildMembers) {
+                players.push(player.name);
+            };
+        }
+
+        var playersGraveyard = [];
+
+        console.log(players, '\n');
+
+        await this.createPuppeteerBrowser();
+
+        for (let index = 0; index < players.length; index++) {
+            const player = players[index];
+        
+            console.log(`Collecting graveyard from player ${player} ${index + 1}/${players.length}`);
+
+            var totalDeaths = await this.getPlayerGraveyardTotalDeaths(player);
+            totalDeaths = totalDeaths == '' ? 0 : parseInt(totalDeaths);
+
+            const playerData = {
+                name: player,
+                graveyard_total_deaths: totalDeaths,
+            }
+
+            console.log(playerData, '\n');
+
+            playersGraveyard.push(playerData);
+
+            await this.sleep(500);
+        };
+
+        graveyardTracker.players = playersGraveyard;
+
+        await fs.promises.writeFile(filePath, JSON.stringify(graveyardTracker, null, 2), 'utf-8');
+    }
+
+    async deathTracker()
+    {
+        const filePath = path.join(__dirname, 'graveyard-tracker.json');
+        const data = await fs.promises.readFile(filePath, 'utf-8');
+        const graveyardTracker = JSON.parse(data);
+
+        await this.createPuppeteerBrowser();
+
+        var deaths = [];
+
+        console.log('Death tracker initialized \n');
+
+        for (let index = 0; index < graveyardTracker.players.length; index++) {
+            const player = graveyardTracker.players[index];
+        
+            console.log(`Looking graveyard from player ${player.name} ${index + 1}/${graveyardTracker.players.length}`);
+
+            var totalDeaths = await this.getPlayerGraveyardTotalDeaths(player.name);
+            totalDeaths = totalDeaths == '' ? 0 : parseInt(totalDeaths);
+
+            if (totalDeaths != player.graveyard_total_deaths) {
+                console.log('New death found \n');
+                
+                deaths.push(player.name);
+
+                graveyardTracker.players[index].graveyard_total_deaths = totalDeaths;
+            } else {
+                console.log('No deaths found \n');
+            }
+
+            await this.sleep(500);
+        };
+
+        console.log('Death tracker finished \n');
+
+        await fs.promises.writeFile(filePath, JSON.stringify(graveyardTracker, null, 2), 'utf-8');
+
+        var deathsData = [];
+
+        for (const player of deaths) {
+            const playerData = await this.getPlayer(player);
+            deathsData.push({
+                name: playerData.info.name,
+                graveyard: playerData.graveyard[0],
+            });
+        }
+
+        return deathsData;
+    }
+
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 }
 
