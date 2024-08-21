@@ -1,10 +1,11 @@
-const fs = require('fs');
+const fs = require('fs').promises;
 const qrcode = require('qrcode-terminal');
 const { Client , LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const ffmpeg = require('ffmpeg-static');
 const chromiumBinary = require('chromium');
 const imageDataUri = require('image-data-uri');
 const moment = require('moment');
+const path = require('path');
 
 const YoutubeMusicDownloader = require('./Modules/youtube-music-downloader.js');
 const DiceRoller = require('./Modules/dice-roller.js');
@@ -52,9 +53,9 @@ class WhatsappWebClient {
             console.log('Whatsapp web client is ready! \n'); 
             
             const rotmg = new Rotmg();
-            await rotmg.fillGraveyardTrackerPlayers();
+            // await rotmg.fillGraveyardTrackerPlayers();
 
-            const filePath = path.join(__dirname, 'graveyard-tracker.json');
+            const filePath = path.join(__dirname, 'Modules/rotmg/graveyard-tracker.json');
             const data = await fs.readFile(filePath, 'utf-8');
             const graveyardTracker = JSON.parse(data);
             const whatsappGroups = graveyardTracker['whatsapp-groups'];
@@ -69,6 +70,8 @@ class WhatsappWebClient {
                 isRunning = true;
 
                 const deaths = await rotmg.deathTracker();
+
+                console.log(`Total deaths found: ${deaths.length} \n`)
 
                 for (const death of deaths) {
                     for (const group of whatsappGroups) {

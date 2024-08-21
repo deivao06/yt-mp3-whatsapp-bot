@@ -324,7 +324,7 @@ class Rotmg {
 
         var playersGraveyard = [];
 
-        console.log(players);
+        console.log(players, '\n');
 
         await this.createPuppeteerBrowser();
 
@@ -341,7 +341,7 @@ class Rotmg {
                 graveyard_total_deaths: totalDeaths,
             }
 
-            console.log(playerData);
+            console.log(playerData, '\n');
 
             playersGraveyard.push(playerData);
 
@@ -363,7 +363,7 @@ class Rotmg {
 
         var deaths = [];
 
-        console.log('Death tracker initialized');
+        console.log('Death tracker initialized \n');
 
         for (let index = 0; index < graveyardTracker.players.length; index++) {
             const player = graveyardTracker.players[index];
@@ -374,19 +374,19 @@ class Rotmg {
             totalDeaths = totalDeaths == '' ? 0 : parseInt(totalDeaths);
 
             if (totalDeaths != player.graveyard_total_deaths) {
-                console.log('New death found');
+                console.log('New death found \n');
                 
                 deaths.push(player.name);
 
                 graveyardTracker.players[index].graveyard_total_deaths = totalDeaths;
             } else {
-                console.log('No deaths found');
+                console.log('No deaths found \n');
             }
 
             await this.sleep(500);
         };
 
-        console.log('Death tracker finished');
+        console.log('Death tracker finished \n');
 
         await fs.writeFile(filePath, JSON.stringify(graveyardTracker, null, 2), 'utf-8');
 
