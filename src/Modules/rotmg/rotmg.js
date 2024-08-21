@@ -85,6 +85,14 @@ class Rotmg {
     
         this.page = await this.browser.newPage();
         await this.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36");
+        await this.page.setRequestInterception(true);
+        this.page.on('request', (request) => {
+            if (['image', 'stylesheet', 'font'].includes(request.resourceType())) {
+                request.abort();
+            } else {
+                request.continue();
+            }
+        });
     }
 
     async getPlayer(name) {
@@ -366,24 +374,28 @@ class Rotmg {
         console.log('Death tracker initialized \n');
 
         for (let index = 0; index < graveyardTracker.players.length; index++) {
-            const player = graveyardTracker.players[index];
+            try {
+                const player = graveyardTracker.players[index];
         
-            console.log(`Looking graveyard from player ${player.name} ${index + 1}/${graveyardTracker.players.length}`);
-
-            var totalDeaths = await this.getPlayerGraveyardTotalDeaths(player.name);
-            totalDeaths = totalDeaths == '' ? 0 : parseInt(totalDeaths);
-
-            if (totalDeaths != player.graveyard_total_deaths) {
-                console.log('New death found \n');
-                
-                deaths.push(player.name);
-
-                graveyardTracker.players[index].graveyard_total_deaths = totalDeaths;
-            } else {
-                console.log('No deaths found \n');
+                console.log(`Looking graveyard from player ${player.name} ${index + 1}/${graveyardTracker.players.length}`);
+    
+                var totalDeaths = await this.getPlayerGraveyardTotalDeaths(player.name);
+                totalDeaths = totalDeaths == '' ? 0 : parseInt(totalDeaths);
+    
+                if (totalDeaths != player.graveyard_total_deaths) {
+                    console.log('New death found \n');
+                    
+                    deaths.push(player.name);
+    
+                    graveyardTracker.players[index].graveyard_total_deaths = totalDeaths;
+                } else {
+                    console.log('No deaths found \n');
+                }
+    
+                await this.sleep(500);
+            } catch (error) {
+                console.log('Failed, skipping');
             }
-
-            await this.sleep(500);
         };
 
         console.log('Death tracker finished \n');
