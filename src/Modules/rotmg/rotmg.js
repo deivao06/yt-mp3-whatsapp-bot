@@ -3,7 +3,7 @@ const cheerio = require('cheerio');
 const moment = require('moment');
 const puppeteer = require('puppeteer');
 const path = require('path');
-const fs = require('fs').promises;
+const fs = require('fs');
 
 class Rotmg {
     constructor () {
@@ -149,7 +149,7 @@ class Rotmg {
                 case 'Guild Rank':
                     player.info.guild_rank = $(element).find('td').eq(1).text();
                     break;
-                case 'Created':
+                case 'First seen':
                     player.info.created = $(element).find('td').eq(1).text();
                     break;
                 case 'Last seen':
@@ -307,7 +307,7 @@ class Rotmg {
 
     async fillGraveyardTrackerPlayers() {
         const filePath = path.join(__dirname, 'graveyard-tracker.json');
-        const data = await fs.readFile(filePath, 'utf-8');
+        const data = await fs.promises.readFile(filePath, 'utf-8');
         const graveyardTracker = JSON.parse(data);
 
         var players = [];
@@ -350,13 +350,13 @@ class Rotmg {
 
         graveyardTracker.players = playersGraveyard;
 
-        await fs.writeFile(filePath, JSON.stringify(graveyardTracker, null, 2), 'utf-8');
+        await fs.promises.writeFile(filePath, JSON.stringify(graveyardTracker, null, 2), 'utf-8');
     }
 
     async deathTracker()
     {
         const filePath = path.join(__dirname, 'graveyard-tracker.json');
-        const data = await fs.readFile(filePath, 'utf-8');
+        const data = await fs.promises.readFile(filePath, 'utf-8');
         const graveyardTracker = JSON.parse(data);
 
         await this.createPuppeteerBrowser();
@@ -388,13 +388,16 @@ class Rotmg {
 
         console.log('Death tracker finished \n');
 
-        await fs.writeFile(filePath, JSON.stringify(graveyardTracker, null, 2), 'utf-8');
+        await fs.promises.writeFile(filePath, JSON.stringify(graveyardTracker, null, 2), 'utf-8');
 
         var deathsData = [];
 
         for (const player of deaths) {
             const playerData = await this.getPlayer(player);
-            deathsData.push(playerData.graveyard[0]);
+            deathsData.push({
+                name: playerData.info.name,
+                graveyard: playerData.graveyard[0],
+            });
         }
 
         return deathsData;

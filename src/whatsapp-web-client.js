@@ -1,4 +1,4 @@
-const fs = require('fs').promises;
+const fs = require('fs');
 const qrcode = require('qrcode-terminal');
 const { Client , LocalAuth, MessageMedia } = require('whatsapp-web.js');
 const ffmpeg = require('ffmpeg-static');
@@ -56,9 +56,20 @@ class WhatsappWebClient {
             await rotmg.fillGraveyardTrackerPlayers();
 
             const filePath = path.join(__dirname, 'Modules/rotmg/graveyard-tracker.json');
-            const data = await fs.readFile(filePath, 'utf-8');
+            const data = await fs.promises.readFile(filePath, 'utf-8');
             const graveyardTracker = JSON.parse(data);
             const whatsappGroups = graveyardTracker['whatsapp-groups'];
+            
+            const chats = await this.wwebClient.getChats();
+            var whatsappGroupsChats = [];
+
+            for (const chat of chats) {
+                for (const group of whatsappGroups) {
+                    if (group == chat.name) {
+                        whatsappGroupsChats.push(chat);
+                    }
+                }
+            }
 
             var isRunning = false;
 
@@ -74,8 +85,52 @@ class WhatsappWebClient {
                 console.log(`Total deaths found: ${deaths.length} \n`)
 
                 for (const death of deaths) {
-                    for (const group of whatsappGroups) {
-                        // Lógica para enviar mensagem aqui
+                    for (const chat of whatsappGroupsChats) {
+                        console.log(`Sending message of ${death.name} death to ${chat.name}`);
+
+                        var equipments = "";
+
+                        death.graveyard.equipments.forEach((equipment, index) => {
+                            if (index == 0) {
+                                equipments += "\n";
+                            }
+
+                            equipments += equipment.name
+
+                            if (index < death.graveyard.equipments.length - 1) {
+                                equipments += "\n";
+                            }
+                        });
+
+                        var baseStats = `HP: ${death.graveyard.base_stats.hp}\n`;
+                        baseStats += `MP: ${death.graveyard.base_stats.mp}\n`;
+                        baseStats += `ATT: ${death.graveyard.base_stats.att}\n`;
+                        baseStats += `DEF: ${death.graveyard.base_stats.def}\n`;
+                        baseStats += `SPD: ${death.graveyard.base_stats.spd}\n`;
+                        baseStats += `VIT: ${death.graveyard.base_stats.vit}\n`;
+                        baseStats += `WIS: ${death.graveyard.base_stats.wis}\n`;
+                        baseStats += `DEX: ${death.graveyard.base_stats.dex}`;
+
+                        var text = `*${death.name} morreu no RotMG*\n`;
+                        text += `*Morto em:* ${moment(death.graveyard.died_on).format('DD/MM/YYYY, HH:mm')}\n\n`;
+
+                        text += `*Class:* ${death.graveyard.class}\n`;
+                        text += `*Level:* ${death.graveyard.level}\n`;
+                        text += `*Fame:* ${death.graveyard.base_fame}\n`;
+                        text += `*Total Fame:* ${death.graveyard.total_fame}\n`;
+                        text += `*Exp:* ${death.graveyard.exp}\n`;
+                        text += `\n*-------------------------------------*\n`;
+                        text += `*Equips:* ${equipments}\n`;
+                        text += `*-------------------------------------*\n\n`;
+                        text += `*Stats:* ${death.graveyard.stats}\n`;
+                        text += `\n*-------------------------------------*\n`;
+                        text += `*Base Stats:* \n${baseStats}\n`;
+                        text += `*-------------------------------------*\n\n`;
+
+                        text += `*Morto por:* ${death.graveyard.killed_by}`;
+            
+                        await chat.sendMessage(text);
+                        console.log('Message sent \n');
                     }
                 }
 
@@ -642,43 +697,110 @@ class WhatsappWebClient {
             imagePath = await imageDataUri.outputFile(player.info.characters_image_url, path);
             const media = await MessageMedia.fromFilePath(imagePath, {unsafeMime: true});
 
-            var text = "*Info*\n";
-            text += `*---------------------------------*\n`;
-            text += `*Nome:* ${player.info.name}\n`;
+            var text = `*Nome:* ${player.info.name}\n`;
             text += `*Personagens:* ${player.info.characters}\n`;
             text += `*Skins:* ${player.info.skins}\n`;
             text += `*Exaltations:* ${player.info.exaltations}\n`;
-            text += `*Fama:* ${player.info.fame}\n`;
+            text += `*Fame:* ${player.info.fame}\n`;
             text += `*Rank:* ${player.info.rank}\n`;
             text += `*Guild:* ${player.info.guild}\n`;
-            text += `*Cargo:* ${player.info.guild_rank}\n`;
+            text += `*Guild Rank:* ${player.info.guild_rank}\n`;
             text += `*Primeiro visto:* ${player.info.created}\n`;
             text += `*Visto por último:* ${player.info.last_seen}\n`;
-            text += `*Descrição:* ${player.info.description}\n\n`;
+            text += `*Descrição:* ${player.info.description ?? "Sem informação"}\n`;
 
+            text += `\n*-------------------------------------*\n`;
             text += `*Personagens*\n`;
-            text += `*---------------------------------*\n`;
+            text += `*-------------------------------------*\n\n`;
+
             if(Object.keys(player.characters).length > 0) {
-                for(const key in player.characters) {
+                for (const key in player.characters) {
                     var character = player.characters[key];
 
-                    text += `*Classe:* ${character.class}\n`;
+                    var equipments = "";
+
+                    character.equipments.forEach((equipment, index) => {
+                        if (index == 0) {
+                            equipments += "\n";
+                        }
+
+                        equipments += equipment.name
+
+                        if (index < character.equipments.length - 1) {
+                            equipments += "\n";
+                        }
+                    });
+
+                    var baseStats = `HP: ${character.base_stats.hp}\n`;
+                    baseStats += `MP: ${character.base_stats.mp}\n`;
+                    baseStats += `ATT: ${character.base_stats.att}\n`;
+                    baseStats += `DEF: ${character.base_stats.def}\n`;
+                    baseStats += `SPD: ${character.base_stats.spd}\n`;
+                    baseStats += `VIT: ${character.base_stats.vit}\n`;
+                    baseStats += `WIS: ${character.base_stats.wis}\n`;
+                    baseStats += `DEX: ${character.base_stats.dex}`;
+
+                    text += `*Class:* ${character.class}\n`;
                     text += `*Level:* ${character.level}\n`;
-                    text += `*Fama:* ${character.fame}\n`;
+                    text += `*Fame:* ${character.fame}\n\n`;
+                    text += `*Equips:* ${equipments}\n\n`;
                     text += `*Stats:* ${character.stats}\n\n`;
+                    text += `*Base Stats:* \n${baseStats}\n\n`;
+
+                    if (key < player.characters.length - 1) {
+                        text += `*-------------------------------------*\n\n`;
+                    }
                 }
             } else {
-                text += "-none\n";
+                text += "-none\n\n";
             }
 
+            text += `*-------------------------------------*\n`;
             text += `*Última morte*\n`;
-            text += `*---------------------------------*\n`;
+            text += `*-------------------------------------*\n\n`;
+
             if(Object.keys(player.graveyard).length > 0) {
-                text += `*Morto em:* ${moment(player.graveyard[0].died_on).format('DD/MM/YYYY, HH:mm')}\n`;
-                text += `*Classe:* ${player.graveyard[0].class}\n`;
-                text += `*Level:* ${player.graveyard[0].level}\n`;
-                text += `*Stats:* ${player.graveyard[0].stats}\n`;
-                text += `*Morto por:* ${player.graveyard[0].killed_by}\n`;
+                const lastDeath = player.graveyard[0];
+
+                var equipments = "";
+
+                lastDeath.equipments.forEach((equipment, index) => {
+                    if (index == 0) {
+                        equipments += "\n";
+                    }
+
+                    equipments += equipment.name
+
+                    if (index < lastDeath.equipments.length - 1) {
+                        equipments += "\n";
+                    }
+                });
+
+                var baseStats = `HP: ${lastDeath.base_stats.hp}\n`;
+                baseStats += `MP: ${lastDeath.base_stats.mp}\n`;
+                baseStats += `ATT: ${lastDeath.base_stats.att}\n`;
+                baseStats += `DEF: ${lastDeath.base_stats.def}\n`;
+                baseStats += `SPD: ${lastDeath.base_stats.spd}\n`;
+                baseStats += `VIT: ${lastDeath.base_stats.vit}\n`;
+                baseStats += `WIS: ${lastDeath.base_stats.wis}\n`;
+                baseStats += `DEX: ${lastDeath.base_stats.dex}`;
+
+                text += `*Morto em:* ${moment(lastDeath.died_on).format('DD/MM/YYYY, HH:mm')}\n\n`;
+
+                text += `*Class:* ${lastDeath.class}\n`;
+                text += `*Level:* ${lastDeath.level}\n`;
+                text += `*Fame:* ${lastDeath.base_fame}\n`;
+                text += `*Total Fame:* ${lastDeath.total_fame}\n`;
+                text += `*Exp:* ${lastDeath.exp}\n`;
+                text += `\n*-------------------------------------*\n`;
+                text += `*Equips:* ${equipments}\n`;
+                text += `*-------------------------------------*\n\n`;
+                text += `*Stats:* ${lastDeath.stats}\n`;
+                text += `\n*-------------------------------------*\n`;
+                text += `*Base Stats:* \n${baseStats}\n`;
+                text += `*-------------------------------------*\n\n`;
+
+                text += `*Morto por:* ${lastDeath.killed_by}`;
             } else {
                 text += "-none\n";
             }
