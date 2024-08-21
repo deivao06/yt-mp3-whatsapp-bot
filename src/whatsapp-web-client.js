@@ -53,7 +53,7 @@ class WhatsappWebClient {
             console.log('Whatsapp web client is ready! \n'); 
             
             const rotmg = new Rotmg();
-            // await rotmg.fillGraveyardTrackerPlayers();
+            await rotmg.fillGraveyardTrackerPlayers();
 
             const filePath = path.join(__dirname, 'Modules/rotmg/graveyard-tracker.json');
             const data = await fs.readFile(filePath, 'utf-8');
