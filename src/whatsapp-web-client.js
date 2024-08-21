@@ -50,6 +50,36 @@ class WhatsappWebClient {
         this.wwebClient.on('auth_failure', message => { console.log(message) });
         this.wwebClient.on('ready', async () => { 
             console.log('Whatsapp web client is ready! \n'); 
+            
+            const rotmg = new Rotmg();
+            await rotmg.fillGraveyardTrackerPlayers();
+
+            const filePath = path.join(__dirname, 'graveyard-tracker.json');
+            const data = await fs.readFile(filePath, 'utf-8');
+            const graveyardTracker = JSON.parse(data);
+            const whatsappGroups = graveyardTracker['whatsapp-groups'];
+
+            var isRunning = false;
+
+            setInterval(async () => {
+                if (isRunning) {
+                    return;
+                }
+
+                isRunning = true;
+
+                const deaths = await rotmg.deathTracker();
+
+                for (const death of deaths) {
+                    for (const group of whatsappGroups) {
+                        // Lógica para enviar mensagem aqui
+                    }
+                }
+
+                isRunning = false;
+            }, 60000);
+
+            console.log('Rotmg death tracker ready! \n'); 
         });
         this.wwebClient.on('message_create', async (message) => { await this.handleMessage(message); });
         this.wwebClient.initialize();
@@ -619,6 +649,7 @@ class WhatsappWebClient {
             text += `*Rank:* ${player.info.rank}\n`;
             text += `*Guild:* ${player.info.guild}\n`;
             text += `*Cargo:* ${player.info.guild_rank}\n`;
+            text += `*Primeiro visto:* ${player.info.created}\n`;
             text += `*Visto por último:* ${player.info.last_seen}\n`;
             text += `*Descrição:* ${player.info.description}\n\n`;
 

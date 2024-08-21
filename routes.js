@@ -115,4 +115,11 @@ router.get('/rotmg/player/:name', async (request, response) => {
     }
 })
 
+// router.get('/rotmg/teste', async (request, response) => {
+//     const rotmg = new Rotmg();
+//     // await rotmg.fillGraveyardTrackerPlayers();
+//     const deaths = await rotmg.deathTracker();
+//     console.log(deaths);
+// })
+
 module.exports = router;
