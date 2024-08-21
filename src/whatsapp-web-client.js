@@ -650,10 +650,14 @@ class WhatsappWebClient {
             }
 
             await chat.sendMessage(text, {media: media});
-            fs.unlinkSync(imagePath);
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath);
+            }
         } catch (e) {
             await chat.sendMessage(e.message);
-            fs.unlinkSync(imagePath);
+            if (fs.existsSync(imagePath)) {
+                fs.unlinkSync(imagePath);
+            }
         }
     }
 }
