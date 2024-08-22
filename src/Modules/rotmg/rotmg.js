@@ -410,7 +410,7 @@ class Rotmg {
 
             while (!success) {
                 try {
-                    console.log(`Collecting player ${player.name} death data`);
+                    console.log(`Collecting player ${player} death data`);
                     const playerData = await this.getPlayer(player);
                     deathsData.push({
                         name: playerData.info.name,
