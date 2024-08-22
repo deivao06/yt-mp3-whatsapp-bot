@@ -119,13 +119,13 @@ class WhatsappWebClient {
                         text += `*Fame:* ${death.graveyard.base_fame}\n`;
                         text += `*Total Fame:* ${death.graveyard.total_fame}\n`;
                         text += `*Exp:* ${death.graveyard.exp}\n`;
-                        text += `\n*-------------------------------------*\n`;
+                        text += `*-------------------------------------*\n`;
                         text += `*Equips:* ${equipments}\n`;
-                        text += `*-------------------------------------*\n\n`;
+                        text += `*-------------------------------------*\n`;
                         text += `*Stats:* ${death.graveyard.stats}\n`;
-                        text += `\n*-------------------------------------*\n`;
+                        text += `*-------------------------------------*\n`;
                         text += `*Base Stats:* \n${baseStats}\n`;
-                        text += `*-------------------------------------*\n\n`;
+                        text += `*-------------------------------------*\n`;
 
                         text += `*Morto por:* ${death.graveyard.killed_by}`;
             
@@ -708,12 +708,13 @@ class WhatsappWebClient {
             text += `*Primeiro visto:* ${player.info.created}\n`;
             text += `*Visto por último:* ${player.info.last_seen}\n`;
             text += `*Descrição:* ${player.info.description ?? "Sem informação"}\n`;
+            text += `*Total de mortes:* ${player.graveyard.length}`;
 
-            text += `\n*-------------------------------------*\n`;
+            text += `\n\n*-------------------------------------*\n`;
             text += `*Personagens*\n`;
-            text += `*-------------------------------------*\n\n`;
+            text += `*-------------------------------------*\n`;
 
-            if(Object.keys(player.characters).length > 0) {
+            if(player.characters.length > 0) {
                 for (const key in player.characters) {
                     var character = player.characters[key];
 
@@ -742,24 +743,27 @@ class WhatsappWebClient {
 
                     text += `*Class:* ${character.class}\n`;
                     text += `*Level:* ${character.level}\n`;
-                    text += `*Fame:* ${character.fame}\n\n`;
-                    text += `*Equips:* ${equipments}\n\n`;
-                    text += `*Stats:* ${character.stats}\n\n`;
-                    text += `*Base Stats:* \n${baseStats}\n\n`;
-
+                    text += `*Fame:* ${character.fame}\n`;
+                    text += `*-------------------------------------*\n`;
+                    text += `*Equips:* ${equipments}\n`;
+                    text += `*-------------------------------------*\n`;
+                    text += `*Stats:* ${character.stats}\n`;
+                    text += `*-------------------------------------*\n`;
+                    text += `*Base Stats:* \n${baseStats}`;
+                    
                     if (key < player.characters.length - 1) {
-                        text += `*-------------------------------------*\n\n`;
+                        text += `\n*-------------------------------------*\n`;
                     }
                 }
             } else {
-                text += "-none\n\n";
+                text += "Não possui personagens";
             }
 
-            text += `*-------------------------------------*\n`;
+            text += `\n\n*-------------------------------------*\n`;
             text += `*Última morte*\n`;
-            text += `*-------------------------------------*\n\n`;
+            text += `*-------------------------------------*\n`;
 
-            if(Object.keys(player.graveyard).length > 0) {
+            if(player.graveyard.length > 0) {
                 const lastDeath = player.graveyard[0];
 
                 var equipments = "";
@@ -792,20 +796,21 @@ class WhatsappWebClient {
                 text += `*Fame:* ${lastDeath.base_fame}\n`;
                 text += `*Total Fame:* ${lastDeath.total_fame}\n`;
                 text += `*Exp:* ${lastDeath.exp}\n`;
-                text += `\n*-------------------------------------*\n`;
+                text += `*-------------------------------------*\n`;
                 text += `*Equips:* ${equipments}\n`;
-                text += `*-------------------------------------*\n\n`;
+                text += `*-------------------------------------*\n`;
                 text += `*Stats:* ${lastDeath.stats}\n`;
-                text += `\n*-------------------------------------*\n`;
+                text += `*-------------------------------------*\n`;
                 text += `*Base Stats:* \n${baseStats}\n`;
-                text += `*-------------------------------------*\n\n`;
+                text += `*-------------------------------------*\n`;
 
                 text += `*Morto por:* ${lastDeath.killed_by}`;
             } else {
-                text += "-none\n";
+                text += "Ainda não morreu\n";
             }
 
             await chat.sendMessage(text, {media: media});
+            
             if (fs.existsSync(imagePath)) {
                 fs.unlinkSync(imagePath);
             }

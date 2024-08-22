@@ -85,6 +85,15 @@ class Rotmg {
     
         this.page = await this.browser.newPage();
         await this.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36");
+        await this.page.setDefaultTimeout(60000);
+        await this.page.setRequestInterception(true);
+        this.page.on('request', (request) => {
+            if (['image', 'stylesheet', 'font'].includes(request.resourceType())) {
+                request.abort();
+            } else {
+                request.continue();
+            }
+        });
     }
 
     async getPlayer(name) {
@@ -310,16 +319,20 @@ class Rotmg {
         const data = await fs.promises.readFile(filePath, 'utf-8');
         const graveyardTracker = JSON.parse(data);
 
-        var players = [];
+        if (graveyardTracker['rotmg-players'].length > 0) {
+            var players = graveyardTracker['rotmg-players'];
+        } else {
+            var players = [];
 
-        for (const item of graveyardTracker['rotmg-guild']) {
-            console.log('Collecting guild members from ' + item);
-
-            var guildMembers = await this.getGuildMembers(item);
-
-            for (const player of guildMembers) {
-                players.push(player.name);
-            };
+            for (const item of graveyardTracker['rotmg-guild']) {
+                console.log('Collecting guild members from ' + item);
+    
+                var guildMembers = await this.getGuildMembers(item);
+    
+                for (const player of guildMembers) {
+                    players.push(player.name);
+                };
+            }
         }
 
         var playersGraveyard = [];
@@ -366,24 +379,28 @@ class Rotmg {
         console.log('Death tracker initialized \n');
 
         for (let index = 0; index < graveyardTracker.players.length; index++) {
-            const player = graveyardTracker.players[index];
+            try {
+                const player = graveyardTracker.players[index];
         
-            console.log(`Looking graveyard from player ${player.name} ${index + 1}/${graveyardTracker.players.length}`);
-
-            var totalDeaths = await this.getPlayerGraveyardTotalDeaths(player.name);
-            totalDeaths = totalDeaths == '' ? 0 : parseInt(totalDeaths);
-
-            if (totalDeaths != player.graveyard_total_deaths) {
-                console.log('New death found \n');
-                
-                deaths.push(player.name);
-
-                graveyardTracker.players[index].graveyard_total_deaths = totalDeaths;
-            } else {
-                console.log('No deaths found \n');
+                console.log(`Looking graveyard from player ${player.name} ${index + 1}/${graveyardTracker.players.length}`);
+    
+                var totalDeaths = await this.getPlayerGraveyardTotalDeaths(player.name);
+                totalDeaths = totalDeaths == '' ? 0 : parseInt(totalDeaths);
+    
+                if (totalDeaths != player.graveyard_total_deaths) {
+                    console.log('New death found \n');
+                    
+                    deaths.push(player.name);
+    
+                    graveyardTracker.players[index].graveyard_total_deaths = totalDeaths;
+                } else {
+                    console.log('No deaths found \n');
+                }
+    
+                await this.sleep(500);
+            } catch (error) {
+                console.log('Failed, skipping');
             }
-
-            await this.sleep(500);
         };
 
         console.log('Death tracker finished \n');
@@ -393,11 +410,23 @@ class Rotmg {
         var deathsData = [];
 
         for (const player of deaths) {
-            const playerData = await this.getPlayer(player);
-            deathsData.push({
-                name: playerData.info.name,
-                graveyard: playerData.graveyard[0],
-            });
+            var success = false;
+
+            while (!success) {
+                try {
+                    console.log(`Collecting player ${player} death data`);
+                    const playerData = await this.getPlayer(player);
+                    deathsData.push({
+                        name: playerData.info.name,
+                        graveyard: playerData.graveyard[0],
+                    });
+                    console.log('Success \n');
+                    success = true;
+                } catch (error) {
+                    console.log('Failed, trying again in 2 seconds');
+                    this.sleep(2000)
+                }
+            }
         }
 
         return deathsData;
