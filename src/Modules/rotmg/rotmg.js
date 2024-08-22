@@ -158,7 +158,7 @@ class Rotmg {
                 case 'Guild Rank':
                     player.info.guild_rank = $(element).find('td').eq(1).text();
                     break;
-                case 'First seen':
+                case 'First seen' || 'Created':
                     player.info.created = $(element).find('td').eq(1).text();
                     break;
                 case 'Last seen':
@@ -235,6 +235,8 @@ class Rotmg {
         });
 
         player.graveyard = await this.getPlayerGraveyard(name);
+
+        await this.browser.close();
 
         return player;
     }
@@ -361,6 +363,8 @@ class Rotmg {
             await this.sleep(500);
         };
 
+        await this.browser.close();
+
         graveyardTracker.players = playersGraveyard;
 
         await fs.promises.writeFile(filePath, JSON.stringify(graveyardTracker, null, 2), 'utf-8');
@@ -399,7 +403,7 @@ class Rotmg {
     
                 await this.sleep(500);
             } catch (error) {
-                console.log('Failed, skipping');
+                console.log('Failed, skipping \n');
             }
         };
 
@@ -428,6 +432,8 @@ class Rotmg {
                 }
             }
         }
+
+        await this.browser.close();
 
         return deathsData;
     }
