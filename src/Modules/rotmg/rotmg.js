@@ -85,6 +85,7 @@ class Rotmg {
     
         this.page = await this.browser.newPage();
         await this.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36");
+        await this.page.setDefaultTimeout(60000);
         await this.page.setRequestInterception(true);
         this.page.on('request', (request) => {
             if (['image', 'stylesheet', 'font'].includes(request.resourceType())) {
@@ -405,11 +406,23 @@ class Rotmg {
         var deathsData = [];
 
         for (const player of deaths) {
-            const playerData = await this.getPlayer(player);
-            deathsData.push({
-                name: playerData.info.name,
-                graveyard: playerData.graveyard[0],
-            });
+            var success = false;
+
+            while (!success) {
+                try {
+                    console.log(`Collecting player ${player.name} death data`);
+                    const playerData = await this.getPlayer(player);
+                    deathsData.push({
+                        name: playerData.info.name,
+                        graveyard: playerData.graveyard[0],
+                    });
+                    console.log('Success \n');
+                    success = true;
+                } catch (error) {
+                    console.log('Failed, trying again in 2 seconds');
+                    this.sleep(2000)
+                }
+            }
         }
 
         return deathsData;
