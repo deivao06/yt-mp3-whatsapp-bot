@@ -319,16 +319,20 @@ class Rotmg {
         const data = await fs.promises.readFile(filePath, 'utf-8');
         const graveyardTracker = JSON.parse(data);
 
-        var players = [];
+        if (graveyardTracker['rotmg-players'].length > 0) {
+            var players = graveyardTracker['rotmg-players'];
+        } else {
+            var players = [];
 
-        for (const item of graveyardTracker['rotmg-guild']) {
-            console.log('Collecting guild members from ' + item);
-
-            var guildMembers = await this.getGuildMembers(item);
-
-            for (const player of guildMembers) {
-                players.push(player.name);
-            };
+            for (const item of graveyardTracker['rotmg-guild']) {
+                console.log('Collecting guild members from ' + item);
+    
+                var guildMembers = await this.getGuildMembers(item);
+    
+                for (const player of guildMembers) {
+                    players.push(player.name);
+                };
+            }
         }
 
         var playersGraveyard = [];

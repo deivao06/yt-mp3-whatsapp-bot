@@ -707,13 +707,14 @@ class WhatsappWebClient {
             text += `*Guild Rank:* ${player.info.guild_rank}\n`;
             text += `*Primeiro visto:* ${player.info.created}\n`;
             text += `*Visto por último:* ${player.info.last_seen}\n`;
-            text += `*Descrição:* ${player.info.description ?? "Sem informação"}`;
+            text += `*Descrição:* ${player.info.description ?? "Sem informação"}\n`;
+            text += `*Total de mortes:* ${player.graveyard.length}`;
 
             text += `\n\n*-------------------------------------*\n`;
             text += `*Personagens*\n`;
             text += `*-------------------------------------*\n`;
 
-            if(Object.keys(player.characters).length > 0) {
+            if(player.characters.length > 0) {
                 for (const key in player.characters) {
                     var character = player.characters[key];
 
@@ -762,7 +763,7 @@ class WhatsappWebClient {
             text += `*Última morte*\n`;
             text += `*-------------------------------------*\n`;
 
-            if(Object.keys(player.graveyard).length > 0) {
+            if(player.graveyard.length > 0) {
                 const lastDeath = player.graveyard[0];
 
                 var equipments = "";
