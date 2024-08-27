@@ -6,6 +6,7 @@ const chromiumBinary = require('chromium');
 const imageDataUri = require('image-data-uri');
 const moment = require('moment');
 const path = require('path');
+const puppeteer = require('puppeteer');
 
 const YoutubeMusicDownloader = require('./Modules/youtube-music-downloader.js');
 const DiceRoller = require('./Modules/dice-roller.js');
@@ -47,13 +48,23 @@ class WhatsappWebClient {
             }
         });
 
+        this.puppeteerBrowserCounter = 0;
+
         this.wwebClient.on('qr', qr => { qrcode.generate(qr, {small: true}); });
         this.wwebClient.on('auth_failure', message => { console.log(message) });
         this.wwebClient.on('ready', async () => { 
             console.log('Whatsapp web client is ready! \n'); 
             
-            const rotmg = new Rotmg();
+            var { browser, page } = await this.createPuppeteerBrowser();
+            console.log('Puppeteer browser created! \n'); 
+            this.puppeteerBrowserCounter++;
+
+            const rotmg = new Rotmg(browser, page);
             await rotmg.fillGraveyardTrackerPlayers();
+
+            await browser.close();
+            console.log('Puppeteer browser closed! \n');
+            this.puppeteerBrowserCounter--;
 
             const filePath = path.join(__dirname, 'Modules/rotmg/graveyard-tracker.json');
             const data = await fs.promises.readFile(filePath, 'utf-8');
@@ -79,6 +90,14 @@ class WhatsappWebClient {
                 }
 
                 isRunning = true;
+
+                var { browser, page } = await this.createPuppeteerBrowser();
+                console.log('Puppeteer browser created! \n'); 
+                this.puppeteerBrowserCounter++;
+
+                const rotmg = new Rotmg(browser, page);
+
+                console.log(`Total puppeteer browsers found: ${this.puppeteerBrowserCounter} \n`)
 
                 const deaths = await rotmg.deathTracker();
 
@@ -135,12 +154,38 @@ class WhatsappWebClient {
                 }
 
                 isRunning = false;
+
+                await browser.close();
+                console.log('Puppeteer browser closed! \n');
+                this.puppeteerBrowserCounter--;
             }, 60000);
 
             console.log('Rotmg death tracker ready! \n'); 
         });
         this.wwebClient.on('message_create', async (message) => { await this.handleMessage(message); });
         this.wwebClient.initialize();
+    }
+
+    async createPuppeteerBrowser()
+    {
+        var browser = await puppeteer.launch({
+            headless: true, 
+            args: ['--no-sandbox', '--disable-dev-shm-usage']
+        });
+    
+        var page = await browser.newPage();
+        await page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36");
+        await page.setDefaultTimeout(60000);
+        await page.setRequestInterception(true);
+        page.on('request', (request) => {
+            if (['image', 'stylesheet', 'font'].includes(request.resourceType())) {
+                request.abort();
+            } else {
+                request.continue();
+            }
+        });
+
+        return { browser, page };
     }
 
     async handleMessage(message) {
@@ -686,7 +731,9 @@ class WhatsappWebClient {
             return;
         }
 
-        const rotmg = new Rotmg();
+        var { browser, page } = await this.createPuppeteerBrowser();
+
+        const rotmg = new Rotmg(browser, page);
         var imagePath = '';
 
         await message.reply('Buscando informações...');
@@ -820,6 +867,10 @@ class WhatsappWebClient {
                 fs.unlinkSync(imagePath);
             }
         }
+
+        await browser.close();
+        console.log('Puppeteer browser closed! \n');
+        this.puppeteerBrowserCounter--;
     }
 }
 
