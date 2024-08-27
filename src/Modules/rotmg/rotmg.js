@@ -1,12 +1,11 @@
 const axios = require("axios");
 const cheerio = require('cheerio');
 const moment = require('moment');
-const puppeteer = require('puppeteer');
 const path = require('path');
 const fs = require('fs');
 
 class Rotmg {
-    constructor () {
+    constructor (browser, page) {
         this.info = {
             name: null,
             characters: null,
@@ -26,8 +25,8 @@ class Rotmg {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36",
         };
         this.playerGraveyard = [];
-        this.page = null;
-        this.browser = null;
+        this.page = page;
+        this.browser = browser;
     }
 
     async getGuildMembers(name) {
@@ -76,28 +75,7 @@ class Rotmg {
         throw error;
     }
 
-    async createPuppeteerBrowser()
-    {
-        this.browser = await puppeteer.launch({
-            headless: true, 
-            args: ['--no-sandbox', '--disable-dev-shm-usage']
-        });
-    
-        this.page = await this.browser.newPage();
-        await this.page.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/127.0.0.0 Safari/537.36");
-        await this.page.setDefaultTimeout(60000);
-        await this.page.setRequestInterception(true);
-        this.page.on('request', (request) => {
-            if (['image', 'stylesheet', 'font'].includes(request.resourceType())) {
-                request.abort();
-            } else {
-                request.continue();
-            }
-        });
-    }
-
     async getPlayer(name) {
-        await this.createPuppeteerBrowser();
         await this.page.goto("https://www.realmeye.com/player/" + name, { waitUntil: 'networkidle2' });
 
         const html = await this.page.content();
@@ -236,8 +214,6 @@ class Rotmg {
 
         player.graveyard = await this.getPlayerGraveyard(name);
 
-        await this.browser.close();
-
         return player;
     }
 
@@ -341,8 +317,6 @@ class Rotmg {
 
         console.log(players, '\n');
 
-        await this.createPuppeteerBrowser();
-
         for (let index = 0; index < players.length; index++) {
             const player = players[index];
         
@@ -363,8 +337,6 @@ class Rotmg {
             await this.sleep(500);
         };
 
-        await this.browser.close();
-
         graveyardTracker.players = playersGraveyard;
 
         await fs.promises.writeFile(filePath, JSON.stringify(graveyardTracker, null, 2), 'utf-8');
@@ -375,8 +347,6 @@ class Rotmg {
         const filePath = path.join(__dirname, 'graveyard-tracker.json');
         const data = await fs.promises.readFile(filePath, 'utf-8');
         const graveyardTracker = JSON.parse(data);
-
-        await this.createPuppeteerBrowser();
 
         var deaths = [];
 
@@ -432,8 +402,6 @@ class Rotmg {
                 }
             }
         }
-
-        await this.browser.close();
 
         return deathsData;
     }
