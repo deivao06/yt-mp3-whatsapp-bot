@@ -160,7 +160,7 @@ class WhatsappWebClient {
             //     this.puppeteerBrowserCounter--;
             // }, 60000);
 
-            console.log('Rotmg death tracker ready! \n'); 
+            // console.log('Rotmg death tracker ready! \n'); 
         });
         this.wwebClient.on('message_create', async (message) => { await this.handleMessage(message); });
         this.wwebClient.initialize();
