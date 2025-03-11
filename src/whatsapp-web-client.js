@@ -1,6 +1,6 @@
 const fs = require('fs');
 const qrcode = require('qrcode-terminal');
-const { Client , LocalAuth, MessageMedia } = require('whatsapp-web.js');
+const { Client , LocalAuth, MessageMedia, Poll } = require('whatsapp-web.js');
 const ffmpeg = require('ffmpeg-static');
 const chromiumBinary = require('chromium');
 const imageDataUri = require('image-data-uri');
@@ -36,7 +36,7 @@ class WhatsappWebClient {
             { "anime": async (message) => { return this.getAnimeDataByName(message, 'tv') }},
             { "encore": async (message) => { return this.getChartByName(message) }},
             { "tibia-player": async (message) => { return this.getPlayerByName(message) }},
-            { "rotmg-player": async (message) => { return this.getRotmgPlayer(message) }}
+            { "rotmg-player": async (message) => { return this.getRotmgPlayer(message) }},
         ];
 
         this.wwebClient = new Client({
@@ -54,113 +54,6 @@ class WhatsappWebClient {
         this.wwebClient.on('auth_failure', message => { console.log(message) });
         this.wwebClient.on('ready', async () => { 
             console.log('Whatsapp web client is ready! \n'); 
-            
-            // var { browser, page } = await this.createPuppeteerBrowser();
-            // console.log('Puppeteer browser created! \n'); 
-            // this.puppeteerBrowserCounter++;
-
-            // const rotmg = new Rotmg(browser, page);
-            // await rotmg.fillGraveyardTrackerPlayers();
-
-            // await browser.close();
-            // console.log('Puppeteer browser closed! \n');
-            // this.puppeteerBrowserCounter--;
-
-            // const filePath = path.join(__dirname, 'Modules/rotmg/graveyard-tracker.json');
-            // const data = await fs.promises.readFile(filePath, 'utf-8');
-            // const graveyardTracker = JSON.parse(data);
-            // const whatsappGroups = graveyardTracker['whatsapp-groups'];
-            
-            // const chats = await this.wwebClient.getChats();
-            // var whatsappGroupsChats = [];
-
-            // for (const chat of chats) {
-            //     for (const group of whatsappGroups) {
-            //         if (group == chat.name) {
-            //             whatsappGroupsChats.push(chat);
-            //         }
-            //     }
-            // }
-
-            // var isRunning = false;
-
-            // setInterval(async () => {
-            //     if (isRunning) {
-            //         return;
-            //     }
-
-            //     isRunning = true;
-
-            //     var { browser, page } = await this.createPuppeteerBrowser();
-            //     console.log('Puppeteer browser created! \n'); 
-            //     this.puppeteerBrowserCounter++;
-
-            //     const rotmg = new Rotmg(browser, page);
-
-            //     console.log(`Total puppeteer browsers found: ${this.puppeteerBrowserCounter} \n`)
-
-            //     const deaths = await rotmg.deathTracker();
-
-            //     console.log(`Total deaths found: ${deaths.length} \n`)
-
-            //     for (const death of deaths) {
-            //         for (const chat of whatsappGroupsChats) {
-            //             console.log(`Sending message of ${death.name} death to ${chat.name}`);
-
-            //             var equipments = "";
-
-            //             death.graveyard.equipments.forEach((equipment, index) => {
-            //                 if (index == 0) {
-            //                     equipments += "\n";
-            //                 }
-
-            //                 equipments += equipment.name
-
-            //                 if (index < death.graveyard.equipments.length - 1) {
-            //                     equipments += "\n";
-            //                 }
-            //             });
-
-            //             var baseStats = `HP: ${death.graveyard.base_stats.hp}\n`;
-            //             baseStats += `MP: ${death.graveyard.base_stats.mp}\n`;
-            //             baseStats += `ATT: ${death.graveyard.base_stats.att}\n`;
-            //             baseStats += `DEF: ${death.graveyard.base_stats.def}\n`;
-            //             baseStats += `SPD: ${death.graveyard.base_stats.spd}\n`;
-            //             baseStats += `VIT: ${death.graveyard.base_stats.vit}\n`;
-            //             baseStats += `WIS: ${death.graveyard.base_stats.wis}\n`;
-            //             baseStats += `DEX: ${death.graveyard.base_stats.dex}`;
-
-            //             var text = `*${death.name} morreu no RotMG*\n`;
-            //             text += `*Morto em:* ${moment(death.graveyard.died_on).format('DD/MM/YYYY, HH:mm')}\n\n`;
-
-            //             text += `*Class:* ${death.graveyard.class}\n`;
-            //             text += `*Level:* ${death.graveyard.level}\n`;
-            //             text += `*Fame:* ${death.graveyard.base_fame}\n`;
-            //             text += `*Total Fame:* ${death.graveyard.total_fame}\n`;
-            //             text += `*Exp:* ${death.graveyard.exp}\n`;
-            //             text += `*-------------------------------------*\n`;
-            //             text += `*Equips:* ${equipments}\n`;
-            //             text += `*-------------------------------------*\n`;
-            //             text += `*Stats:* ${death.graveyard.stats}\n`;
-            //             text += `*-------------------------------------*\n`;
-            //             text += `*Base Stats:* \n${baseStats}\n`;
-            //             text += `*-------------------------------------*\n`;
-
-            //             text += `*Morto por:* ${death.graveyard.killed_by}`;
-            
-            //             await chat.sendMessage(text);
-            //             console.log('Message sent \n');
-            //         }
-            //     }
-
-            //     isRunning = false;
-
-            //     await browser.close();
-            //     console.log('Puppeteer browser closed! \n');
-            //     this.puppeteerBrowserCounter--;
-            // }, 60000);
-
-            // console.log('Rotmg death tracker ready! \n'); 
         });
         this.wwebClient.on('message_create', async (message) => { await this.handleMessage(message); });
         this.wwebClient.initialize();

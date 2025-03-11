@@ -27,7 +27,7 @@
     "sqlite": "^4.2.1",
     "sqlite3": "^5.1.6",
     "usetube": "^2.2.7",
-    "whatsapp-web.js": "github:pedroslopez/whatsapp-web.js#webpack-exodus",
+    "whatsapp-web.js": "^1.26.0",
     "ytdl-mp3": "^3.1.0",
     "ytsr": "^3.8.2"
   }
